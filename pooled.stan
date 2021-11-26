@@ -1,32 +1,35 @@
+// -------------------------------------
 // This is a pooled Stan model for the
 // pancreatic cancer biomarker data set.  
+// -------------------------------------
 
-// The input data
 data {
   // Lengths of the observation vectors
   int<lower=0> N1;
   int<lower=0> N2;
   int<lower=0> N3;
-  // Observations for each group
-  vector[N1] y1;
-  vector[N2] y2;
-  vector[N3] y3;
+  // Observations of the 4 protein levels for each group
+  vector[4] y1[N1];
+  vector[4] y2[N2];
+  vector[4] y3[N3];
 }
 
-// The parameters accepted by the model
 parameters {
-  real<lower=0> alpha;
-  real<lower=0> beta;
+  vector<lower=0> [4] alpha;
+  vector<lower=0> [4] beta;
 }
 
-// The model to be estimated
 model {
-  //priors
-  alpha ~ gamma(1, 1);
-  beta ~ gamma(0.5, 1);
-  //Likelihood
-  y1 ~ gamma(alpha, beta);
-  y2 ~ gamma(alpha, beta);
-  y3 ~ gamma(alpha, beta);
+  // Priors
+  for (j in 1:4) {
+    alpha[j] ~ gamma(1, 1);
+    beta[j] ~ gamma(0.5, 1);    
+  }
+  // Likelihoods
+  for (j in 1:4) {
+    y1[,j] ~ gamma(alpha[j], beta[j]);
+    y2[,j] ~ gamma(alpha[j], beta[j]);
+    y3[,j] ~ gamma(alpha[j], beta[j]);
+  }
 }
 
