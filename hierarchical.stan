@@ -1,7 +1,9 @@
+// ------------------------------------------
 // This is a hierarchical Stan model for the
-// pancreatic cancer biomarker data set.  
+// "Urinary biomarkers for pancreatic cancer"
+// dataset.  
+// ------------------------------------------
 
-// The input data
 data {
   // Lengths of the observation vectors
   int<lower=0> N1;
@@ -25,7 +27,6 @@ transformed data {
   }
 }
 
-// The parameters accepted by the model
 parameters {
   // Hyperparamters
   vector<lower=0>[4] shape[2];
@@ -35,21 +36,20 @@ parameters {
   vector<lower=0>[4] beta[3];
 }
 
-// The model to be estimated
 model {
-  //k->number of parameters in priors
-  //j->number of proteins
-  // hyperpriors
+  // k-> number of parameters in priors
+  // j-> number of proteins
+  // Hyperpriors
   for (k in 1:2){
     shape[k,] ~ gamma(1,1);
     scale[k,] ~ gamma(1,1);
   }
-  //priors
+  // Priors
   for (j in 1:4){
     alpha[,j] ~ normal(shape[1,j], scale[1,j]);
     beta[,j] ~ gamma(shape[2,j], scale[2,j]);
   }
-  //Likelihood
+  // Likelihood
   y1[,1] ~ gamma(alpha[1,1], beta[1,1]);
   y2[,1] ~ gamma(alpha[2,1], beta[2,1]);
   y3[,1] ~ gamma(alpha[3,1], beta[3,1]);

@@ -33,3 +33,28 @@ model {
   }
 }
 
+generated quantities {
+  // Log-likelihoods of the posterior draws
+  vector[4] log_lik_1[N1];
+  vector[4] log_lik_2[N2];
+  vector[4] log_lik_3[N3];
+  // Group 1
+  for (j in 1:4) {
+    for (n in 1:N1) {
+      log_lik_1[n,j] = gamma_lpdf(y1[n,j] | alpha[j], beta[j]);
+    }
+  }
+  //Group 2
+  for (j in 1:4) {
+    for (n in 1:N2) {
+      log_lik_2[n,j] = gamma_lpdf(y2[n,j] | alpha[j], beta[j]);
+    }
+  }
+  //Group 3
+  for (j in 1:4) {
+    for (n in 1:N3) {
+      log_lik_3[n,j] = gamma_lpdf(y3[n,j] | alpha[j], beta[j]);
+    }
+  }
+}
+
