@@ -1,7 +1,8 @@
-// -------------------------------------
+// ------------------------------------------
 // This is a pooled Stan model for the
-// pancreatic cancer biomarker data set.  
-// -------------------------------------
+// "Urinary biomarkers for pancreatic cancer"
+// data set.  
+// ------------------------------------------
 
 data {
   // Lengths of the observation vectors
