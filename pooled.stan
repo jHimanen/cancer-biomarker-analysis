@@ -42,32 +42,46 @@ model {
 }
 
 generated quantities {
+  // Posterior predictive distributions
+  vector[4] ypred_1;
+  vector[4] ypred_2;
+  vector[4] ypred_3;
   // Log-likelihoods of the posterior draws
   vector[4] log_lik_1[N1];
   vector[4] log_lik_2[N2];
   vector[4] log_lik_3[N3];
+  
   // Group 1
+  ypred_1[1] = gamma_rng(alpha, beta);
   for (n in 1:N1)
     log_lik_1[n,1] = gamma_lpdf(y1[n,1] | alpha, beta);
+    
   for (j in 1:3) {
+    ypred_1[j+1] = normal_rng(mu[j], sigma[j]);
     for (n in 1:N1) {
-      log_lik_1[n,j+1] = normal_lpdf(y1[n,j+1] | mu[j], sigma[j]);
+      log_lik_1[n,j+1] = normal_lpdf(log(y1[n,j+1]) | mu[j], sigma[j]);
     }
   }
   //Group 2
+  ypred_2[1] = gamma_rng(alpha, beta);
   for (n in 1:N2)
     log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha, beta);
+    
   for (j in 1:3) {
+    ypred_2[j+1] = normal_rng(mu[j], sigma[j]);
     for (n in 1:N2) {
-      log_lik_2[n,j+1] = normal_lpdf(y2[n,j+1] | mu[j], sigma[j]);
+      log_lik_2[n,j+1] = normal_lpdf(log(y2[n,j+1]) | mu[j], sigma[j]);
     }
   }
   //Group 3
+  ypred_3[1] = gamma_rng(alpha, beta);
   for (n in 1:N3)
       log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha, beta);
+      
   for (j in 1:3) {
+    ypred_3[j+1] = normal_rng(mu[j], sigma[j]);
     for (n in 1:N3) {
-      log_lik_3[n,j+1] = normal_lpdf(y3[n,j+1] | mu[j], sigma[j]);
+      log_lik_3[n,j+1] = normal_lpdf(log(y3[n,j+1]) | mu[j], sigma[j]);
     }
   }
 }

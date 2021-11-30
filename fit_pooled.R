@@ -8,7 +8,7 @@
 library(rstan)
 library(loo)
 
-data_path <- "Kurssit/Bayesian Data Analysis/Project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
+data_path <- '~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
