@@ -16,21 +16,28 @@ data {
 }
 
 parameters {
-  vector<lower=0> [4] alpha;
-  vector<lower=0> [4] beta;
+  real<lower=0> alpha;
+  real<lower=0> beta;
+  vector<lower=0> [3] mu;
+  vector<lower=0> [3] sigma;
 }
 
 model {
   // Priors
-  for (j in 1:4) {
-    alpha[j] ~ gamma(1, 1);
-    beta[j] ~ gamma(0.5, 1);    
+  alpha ~ gamma(1, 1);
+  beta ~ gamma(0.5, 1);  
+  for (j in 1:3) {
+    mu[j] ~ normal(0,20);
+    sigma[j] ~ gamma(1, 1);
   }
   // Likelihoods
-  for (j in 1:4) {
-    y1[,j] ~ gamma(alpha[j], beta[j]);
-    y2[,j] ~ gamma(alpha[j], beta[j]);
-    y3[,j] ~ gamma(alpha[j], beta[j]);
+  y1[,1] ~ gamma(alpha, beta);
+  y2[,1] ~ gamma(alpha, beta);
+  y3[,1] ~ gamma(alpha, beta);
+  for (j in 1:3) {
+    log(y1[,j+1]) ~ normal(mu[j], sigma[j]);
+    log(y2[,j+1]) ~ normal(mu[j], sigma[j]);
+    log(y3[,j+1]) ~ normal(mu[j], sigma[j]);
   }
 }
 
@@ -40,21 +47,27 @@ generated quantities {
   vector[4] log_lik_2[N2];
   vector[4] log_lik_3[N3];
   // Group 1
-  for (j in 1:4) {
+  for (n in 1:N1)
+    log_lik_1[n,1] = gamma_lpdf(y1[n,1] | alpha, beta);
+  for (j in 1:3) {
     for (n in 1:N1) {
-      log_lik_1[n,j] = gamma_lpdf(y1[n,j] | alpha[j], beta[j]);
+      log_lik_1[n,j+1] = normal_lpdf(y1[n,j+1] | mu[j], sigma[j]);
     }
   }
   //Group 2
-  for (j in 1:4) {
+  for (n in 1:N2)
+    log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha, beta);
+  for (j in 1:3) {
     for (n in 1:N2) {
-      log_lik_2[n,j] = gamma_lpdf(y2[n,j] | alpha[j], beta[j]);
+      log_lik_2[n,j+1] = normal_lpdf(y2[n,j+1] | mu[j], sigma[j]);
     }
   }
   //Group 3
-  for (j in 1:4) {
+  for (n in 1:N3)
+      log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha, beta);
+  for (j in 1:3) {
     for (n in 1:N3) {
-      log_lik_3[n,j] = gamma_lpdf(y3[n,j] | alpha[j], beta[j]);
+      log_lik_3[n,j+1] = normal_lpdf(y3[n,j+1] | mu[j], sigma[j]);
     }
   }
 }
