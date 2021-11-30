@@ -18,7 +18,7 @@ data {
 parameters {
   real<lower=0> alpha;
   real<lower=0> beta;
-  vector<lower=0> [3] mu;
+  vector [3] mu;
   vector<lower=0> [3] sigma;
 }
 
