@@ -3,10 +3,26 @@ title: '[REPORT]'
 author: "Noora Torpo, Joel Himanen"
 date: "11/25/2021"
 output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+1)  Introduction describing the motivation, the problem and the main modeling idea. Showing some illustrative figure is recommended.
+2)  Description of the data and the analysis problem. Provide information where the data was obtained, and if it has been previously used in some online case study and how your analysis differs from the existing analyses.
+3)  Description of at least two models, for example: non hierarchical and hierarchical, linear and non linear, variable selection with many models.
+4)  Informative or weakly informative priors, and justification of their choices.
+5)  Stan, rstanarm or brms code.
+6)  How the Stan model was run, that is, what options were used. This is also more clear as combination of textual explanation and the actual code line.
+7)  Convergence diagnostics (Rˆ, ESS, divergences) and what was done if the convergence was not good with the first try.
+8)  Posterior predictive checks and what was done to improve the model.
+9)  Model comparison (e.g. with LOO-CV).
+10) Predictive performance assessment if applicable (e.g. classification accuracy) and evaluation of practical usefulness of the accuracy. If not applicable, then explanation why in this case the predictive performance is not applicable.
+11) Sensitivity analysis with respect to prior choices (i.e. checking whether the result changes a lot if prior is changed)
+12) Discussion of issues and potential improvements.
+13) Conclusion what was learned from the data analysis.
+14) Self-reflection of what the group learned while making the project.
