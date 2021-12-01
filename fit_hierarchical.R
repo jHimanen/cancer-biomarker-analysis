@@ -8,7 +8,7 @@
 library(rstan)
 library(loo)
 
-data_path <- '~/your/path/to/dataset' # Replace with working path
+data_path <- '~/Code/courses/BDA/project/Debernardi et al 2020 data.csv' #'~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -29,7 +29,9 @@ stan_data <- list(
 # Fit the Stan model
 hier_fit <- stan(
   file = 'hierarchical.stan',
-  data = stan_data
+  data = stan_data,
+  iter = 4000,
+  control = list(adapt_delta = 0.99)
 )
 
 # Extract log-likelihoods for LOO evaluation

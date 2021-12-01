@@ -1,6 +1,6 @@
 #Plot histograms by groups
 
-data_path <- "Kurssit/Bayesian Data Analysis/Project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
+data_path <- "~/Code/courses/BDA/project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
 
 #Creatinine
