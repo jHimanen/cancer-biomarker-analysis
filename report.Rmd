@@ -1,5 +1,5 @@
 ---
-title: '[REPORT]'
+title: 'A Bayesian approach to analyzing urinary biomarkers for pancreatic cancer'
 author: "Noora Torpo, Joel Himanen"
 date: "11/25/2021"
 output: pdf_document
@@ -26,3 +26,21 @@ knitr::opts_chunk$set(echo = TRUE)
 12) Discussion of issues and potential improvements.
 13) Conclusion what was learned from the data analysis.
 14) Self-reflection of what the group learned while making the project.
+
+# 1 Introduction
+
+Pancreatic cancer, or more accurately, its most common form, *Pancreatic ductal adenocarcinoma* (PDAC), is one of the most lethal forms of cancer. It is often diagnosed at a very late stage, which, combined to its heterogenous base of genetic mutations, leads to an average 5-year survival rate of less than 10%. (Sarantis, et. al. 2020) Therefore, research on early signs of PDAC can be considered to be of utmost importance.
+
+This study focuses on conducting Bayesian inference on a data set, which holds measurements of potential biomarkers for PDAC. We aim to model the biomarker levels using weakly informative priors to generate posterior distributions using two different approaches in Stan and R. The goal is to see if and how the distributions for the different biomarkers differ between healthy and positively diagnosed test subjects.
+
+# 2 The data
+
+
+
+
+
+
+
+# References
+
+[1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
