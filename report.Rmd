@@ -41,7 +41,7 @@ The goal is to see if and how the distributions for the different biomarkers dif
 The data used in this study dates back to research done by Debernardi et al. in 20020.[2] The set includes information and measurements from 590 test subjects, the measurements considered in this study being amounts of four different proteins measured from urine samples:
 
 -   **Creatinine**, commonly used to indicate kidney function
--   **YVLE1** (lymphatic vessel endothelial hyaluronan receptor 1), may have a part in tumor metastasis
+-   **LYVE1** (lymphatic vessel endothelial hyaluronan receptor 1), may have a part in tumor metastasis
 -   **REG1B**, potentially related to pancreas regeneration
 -   **TFF1** (trefoil factor 1), may be associated with regeneration and repair of the urinary tract
 
@@ -52,6 +52,12 @@ Test subjects are divided into three different groups:
 -   1 = Healthy control subjects (183 samples)
 -   2 = Subjects with some beningn pancreatic disease (208 samples)
 -   3 = Subjects with a positive PDAC diagnosis (199 samples)
+
+Figure 1 is a visualization of these observations. Each histogram represents one of the four measured protein amounts. The subject groups are color coded (1 = green, 2 = blue, 3 = red), with overlaps presented as mixtures of the overlapping colors.  
+
+```{r, echo=FALSE, out.width="60%", out.height="30%", fig.cap="Histograms of the observed data", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/creatinine_data.png','./images/lyve1_data.png', './images/reg1b_data.png', './images/tff1_data.png'))
+``` 
 
 The workflow of this study attempts to fit some probability distributions to each of the four protein levels in all three subject groups.
 This is done by choosing non- or weakly informative priors for the parameters of these target distributions.
@@ -94,11 +100,11 @@ ln(y_i^j) &\sim \mathcal{N}\left(\mu^j, {\sigma^j}^2\right) \hspace{1cm} i=1,2,3
 \sigma^j &\sim \Gamma(1,1)  \\
 \end{aligned}
 $$
+
 ## Hierarchical model
 
 Hierarchical model is constricted similarly but defined priors use hyperparametrs. In general, we will denote hyperparameters with lower index P. The corresponding hierarchical formulation of the exponential model to the creatinine data can be written as follows.
 
-Hierarchical model is constricted similarly but defined priors use hyperparametrs. In general, we will denote hyperparameters with lower index P. The corresponding hierarchical formulation of the exponential model to the creatinine data can be written as follows.
 
 $$
 \begin{aligned}

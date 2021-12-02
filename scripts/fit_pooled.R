@@ -1,6 +1,6 @@
 ############################################
 # This is an R script used to fit the
-# hierarchical Stan model and compute model
+# pooled Stan model and compute model
 # evaluation diagnostics for the "Urinary
 # biomarkers for pancreatic cancer" dataset.
 ############################################
@@ -8,7 +8,7 @@
 library(rstan)
 library(loo)
 
-data_path <- '~/Code/courses/BDA/project/Debernardi et al 2020 data.csv' #'~/your/path/to/dataset' # Replace with working path
+data_path <- '~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -27,18 +27,16 @@ stan_data <- list(
 )
 
 # Fit the Stan model
-hier_fit <- stan(
-  file = 'hierarchical.stan',
-  data = stan_data,
-  iter = 4000,
-  control = list(adapt_delta = 0.99)
+pooled_fit <- stan(
+  file = '../models/pooled.stan',
+  data = stan_data
 )
 
 # Extract log-likelihoods for LOO evaluation
 log_liks <- list(
-  extract_log_lik(hier_fit, parameter_name = 'log_lik_1', merge_chains = FALSE),
-  extract_log_lik(hier_fit, parameter_name = 'log_lik_2', merge_chains = FALSE),
-  extract_log_lik(hier_fit, parameter_name = 'log_lik_3', merge_chains = FALSE)
+  extract_log_lik(pooled_fit, parameter_name = 'log_lik_1', merge_chains = FALSE),
+  extract_log_lik(pooled_fit, parameter_name = 'log_lik_2', merge_chains = FALSE),
+  extract_log_lik(pooled_fit, parameter_name = 'log_lik_3', merge_chains = FALSE)
 )
 
 # Initialize the diagnostics matrix
