@@ -28,7 +28,7 @@ stan_data <- list(
 
 # Fit the Stan model
 pooled_fit <- stan(
-  file = '../models/pooled.stan',
+  file = '[pathtorepo]/cancer-biomarker-analysis/models/pooled.stan', # Replace with working path
   data = stan_data
 )
 

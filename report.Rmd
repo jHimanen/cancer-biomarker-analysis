@@ -130,6 +130,30 @@ $$
 
 # 4 Priors
 
+
+
+# N Fitting the models
+
+Both of the models were first run with the default options of the `rstan::stan()` function, that is
+
+- Number of chains: 4
+- Chain length: 2000
+- Warmup length: floor(chain length / 2)
+
+The pooled model seemed to converge excellently with the default options. There were no divergences and all $\hat{R}$ values differed from 1 by no more than roughly $10^{-2}$, so there was no need to tweak the options in this case.
+
+The fitting of the hierarchical model raised a warning that we had a bit over 200 divergent post-warmup transitions. Our first attempt to get that number down was to double the chain length, which seemed to have at least some positive effect. Then we lowered the sampling step size by setting the `adapt_delta` parameter to 0.99. This had a very good effect, and we were able to get the number of divergences to under 20. At this point, we decided to accept the result. Below is an example code block, showing how the hierarchical model was run.
+
+```{r, eval=FALSE}
+hier_fit <- stan(
+  file = 'path/to/repository/cancer-biomarker-analysis/models/hierarchical.stan',
+  data = stan_data,
+  iter = 4000,
+  control = list(adapt_delta = 0.99)
+)
+```
+
+
 # References
 
 -   [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/

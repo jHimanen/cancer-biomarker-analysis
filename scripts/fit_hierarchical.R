@@ -28,7 +28,7 @@ stan_data <- list(
 
 # Fit the Stan model
 hier_fit <- stan(
-  file = '../models/hierarchical.stan',
+  file = '[pathtorepo]/cancer-biomarker-analysis/models/hierarchical.stan', # Replace with working path
   data = stan_data,
   iter = 4000,
   control = list(adapt_delta = 0.99)
