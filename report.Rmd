@@ -29,37 +29,102 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # 1 Introduction
 
-Pancreatic cancer, or more accurately, its most common form, *Pancreatic ductal adenocarcinoma* (PDAC), is one of the most lethal forms of cancer. It is often diagnosed at a very late stage, which, combined to its heterogenous base of genetic mutations, leads to an average 5-year survival rate of less than 10%.[1] Therefore, research on early signs of PDAC can be considered to be of utmost importance.
+Pancreatic cancer, or more accurately, its most common form, *Pancreatic ductal adenocarcinoma* (PDAC), is one of the most lethal forms of cancer.
+It is often diagnosed at a very late stage, which, combined to its heterogenous base of genetic mutations, leads to an average 5-year survival rate of less than 10%.[1] Therefore, research on early signs of PDAC can be considered to be of utmost importance.
 
-This study focuses on conducting Bayesian inference on a data set, which holds measurements of potential biomarkers for PDAC. We aim to model the biomarker levels using weakly informative priors to generate posterior distributions using two different approaches in Stan and R. The goal is to see if and how the distributions for the different biomarkers differ between healthy and positively diagnosed test subjects.
+This study focuses on conducting Bayesian inference on a data set, which holds measurements of potential biomarkers for PDAC.
+We aim to model the biomarker levels using weakly informative priors to generate posterior distributions using two different approaches in Stan and R.
+The goal is to see if and how the distributions for the different biomarkers differ between healthy and positively diagnosed test subjects.
 
 # 2 Data & workflow
 
 The data used in this study dates back to research done by Debernardi et al. in 20020.[2] The set includes information and measurements from 590 test subjects, the measurements considered in this study being amounts of four different proteins measured from urine samples:
 
-- **Creatinine**, commonly used to indicate kidney function
-- **YVLE1** (lymphatic vessel endothelial hyaluronan receptor 1), may have a part in tumor metastasis
-- **REG1B**, potentially related to pancreas regeneration
-- **TFF1** (trefoil factor 1), may be associated with regeneration and repair of the urinary tract
+-   **Creatinine**, commonly used to indicate kidney function
+-   **YVLE1** (lymphatic vessel endothelial hyaluronan receptor 1), may have a part in tumor metastasis
+-   **REG1B**, potentially related to pancreas regeneration
+-   **TFF1** (trefoil factor 1), may be associated with regeneration and repair of the urinary tract
 
 Of these, the three latter ones are considered target biomarkers, that could potentially help early diagnosis of PDAC.
 
 Test subjects are divided into three different groups:
 
-- 1 = Healthy control subjects (183 samples)
-- 2 = Subjects with some beningn pancreatic disease (208 samples)
-- 3 = Subjects with a positive PDAC diagnosis (199 samples)
+-   1 = Healthy control subjects (183 samples)
+-   2 = Subjects with some beningn pancreatic disease (208 samples)
+-   3 = Subjects with a positive PDAC diagnosis (199 samples)
 
-The workflow of this study attempts to fit some probability distributions to each of the four protein levels in all three subject groups. This is done by choosing non- or weakly informative priors for the parameters of these target distributions. Using Stan, we then compute the likelihoods for our observations, and generate the resulting posterior distributions. Our hypothesis is, that the posterior distributions of at least some of the biomarkers differ considerably between healthy and PDAC-positive groups. We will also compare two different modeling approaches:
+The workflow of this study attempts to fit some probability distributions to each of the four protein levels in all three subject groups.
+This is done by choosing non- or weakly informative priors for the parameters of these target distributions.
+Using Stan, we then compute the likelihoods for our observations, and generate the resulting posterior distributions.
+Our hypothesis is, that the posterior distributions of at least some of the biomarkers differ considerably between healthy and PDAC-positive groups.
+We will also compare two different modeling approaches:
 
-- A pooled model, where we assume all three subject groups have the same prior distributions
-- A hierarchical model, where each prior has differently distributed hyperparameters
+-   A pooled model, where we assume all three subject groups have the same prior distributions
+-   A hierarchical model, where each prior has differently distributed hyperparameters
 
-Data analysis in the original paper was done using "classical" statistical learning theory and tests. To our knowledge, no other analyses have been performed on this dataset, so we can assume that this is the first time a Bayesian approach has been used on this case. 
+Data analysis in the original paper was done using "classical" statistical learning theory and tests.
+To our knowledge, no other analyses have been performed on this dataset, so we can assume that this is the first time a Bayesian approach has been used on this case.
 
+# 3 Models
 
+In this problem setting, we are fitting two types of models for the data: a pooled model and a hierarchical model. The goal is to find distributions for proteins for all three diagnosis groups. Therefore, the input data includes three matrices including the data as well as the number of observations. Note that the groups have different lengths. The data is denoted by $y_i$, $i=1,2,3$ corresponding to each group, where each column of presents four different proteins. Similarly the number of observations is denote as $n_i$. For the pooled model, we are using same parameters for all of the groups meaning that we are note considering the groups but the whole data set. For hierarchical model, the distributions have shared hyperparameters but for different groups, the distributions are fitted separately. 
+
+As mentioned above, we are considering four proteins or biomarkers: creatinine, LYVE1, REG1B and TFF1. In both pooled and hierarchical model, the distributions are fitted separately for each protein. After considering the distributions of the data, we decided to fit an exponential model with two parameters to creatinine and after logarithmic transformation we decided to fit a Gaussian model to the three remaining proteins. In practice, this means that we are fitting gamma distribution to creatinine data and normal distribution to log-transformed data of LYVE1, REG1B and TFF1. Note that we are using natural logarithm. After logarithmic transformation, the histograms of the three proteins were similar enough for us to use same prior distributions for their parameters. The decision on on the usage of the log-scale and normal distribution was made after it turned out that the exponential model could not be fitted to the data sensibly.
+
+TÄHÄN LISÄTÄÄN VIELÄ PAREMMAT PERUSTELUT EKSPONENTIALISEN JA NORMAALIMALLIN VALINNASTA, KUN TIETÄÄ MITÄ KAKKOS KOHTAAN ON KIRJOITETTU DATASTA JA MIHIN KUVIIN VAIKKA VIITATA.
+
+## Pooled model
+
+Exponential model fitted to the creatinine data can be written as follows. Note that the choice of priors will be discussed in part 4. The first column of the data is denoted as $y_i^1$. Gamma distribution is denoted as $\Gamma$.
+
+$$
+\begin{aligned}
+y_i^1 &\sim \Gamma(\alpha, \beta) \hspace{1cm} i=1,2,3 \\
+\alpha &\sim \Gamma(1,1) \\
+\beta &\sim \Gamma(0.5,1)
+\end{aligned}
+$$
+
+The Gaussian model fitted to the data for three other proteins can be written as follows. Indexing $j=2,3,4$ refers to the proteins LYVE1, REB1B and TFF1 respectively.
+
+$$
+\begin{aligned}
+ln(y_i^j) &\sim \mathcal{N}\left(\mu^j, {\sigma^j}^2\right) \hspace{1cm} i=1,2,3 \hspace{5mm} j=2,3,4 \\
+\mu^j &\sim \mathcal{N}\left(0,20^2\right)  \\
+\sigma^j &\sim \Gamma(1,1)  \\
+\end{aligned}
+$$
+## Hierarchical model
+
+Hierarchical model is constricted similarly but defined priors use hyperparametrs. In general, we will denote hyperparameters with lower index P. The corresponding hierarchical formulation of the exponential model to the creatinine data can be written as follows.
+
+Hierarchical model is constricted similarly but defined priors use hyperparametrs. In general, we will denote hyperparameters with lower index P. The corresponding hierarchical formulation of the exponential model to the creatinine data can be written as follows.
+
+$$
+\begin{aligned}
+y_i^1 &\sim \Gamma(\alpha_i, \beta_i) \hspace{1cm} i=1,2,3 \\
+\alpha_i &\sim \Gamma(\alpha_{P_1},\beta_{P_1}) \\
+\beta_i &\sim \Gamma(\alpha_{P_1},\beta_{P_1}) \\
+\alpha_{P_k} &\sim \Gamma(1,1) \hspace{1cm} k=1,2 \\
+\beta_{P_k} &\sim \Gamma(1,1)
+\end{aligned}
+$$
+The corresponding hierarchical formulation of the Gaussian model fitted to the data for three other proteins can be written as follows.
+
+$$
+\begin{aligned}
+ln(y_i^j) &\sim \mathcal{N}\left(\mu^j_i, {\sigma^j_i}^2\right) \hspace{1cm} &i=1,2,3 \hspace{5mm} j=2,3,4 \\
+\mu^j_i &\sim \mathcal{N}\left(\mu_{P_1}^j,{\sigma_{P_1}^j}^2\right)   \\
+\sigma^j_i &\sim \Gamma\left(\mu_{P_2}^j,\sigma_{P_2}^j\right) \\
+\mu_{P_1}^j &\sim \mathcal{N}\left(0,20^2\right) \\
+\mu_{P_2}^j &\sim \Gamma(1,1) \\
+\sigma_{P_k}^j &\sim \Gamma(1,1) & k=1,2
+\end{aligned}
+$$
+
+# 4 Priors
 
 # References
 
-- [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
-- [2] Debernardi S, O’Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case–control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
+-   [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
+-   [2] Debernardi S, O'Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case--control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
