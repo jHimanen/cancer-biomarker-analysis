@@ -29,18 +29,37 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # 1 Introduction
 
-Pancreatic cancer, or more accurately, its most common form, *Pancreatic ductal adenocarcinoma* (PDAC), is one of the most lethal forms of cancer. It is often diagnosed at a very late stage, which, combined to its heterogenous base of genetic mutations, leads to an average 5-year survival rate of less than 10%. (Sarantis, et. al. 2020) Therefore, research on early signs of PDAC can be considered to be of utmost importance.
+Pancreatic cancer, or more accurately, its most common form, *Pancreatic ductal adenocarcinoma* (PDAC), is one of the most lethal forms of cancer. It is often diagnosed at a very late stage, which, combined to its heterogenous base of genetic mutations, leads to an average 5-year survival rate of less than 10%.[1] Therefore, research on early signs of PDAC can be considered to be of utmost importance.
 
 This study focuses on conducting Bayesian inference on a data set, which holds measurements of potential biomarkers for PDAC. We aim to model the biomarker levels using weakly informative priors to generate posterior distributions using two different approaches in Stan and R. The goal is to see if and how the distributions for the different biomarkers differ between healthy and positively diagnosed test subjects.
 
-# 2 The data
+# 2 Data & workflow
 
+The data used in this study dates back to research done by Debernardi et al. in 20020.[2] The set includes information and measurements from 590 test subjects, the measurements considered in this study being amounts of four different proteins measured from urine samples:
 
+- **Creatinine**, commonly used to indicate kidney function
+- **YVLE1** (lymphatic vessel endothelial hyaluronan receptor 1), may have a part in tumor metastasis
+- **REG1B**, potentially related to pancreas regeneration
+- **TFF1** (trefoil factor 1), may be associated with regeneration and repair of the urinary tract
 
+Of these, the three latter ones are considered target biomarkers, that could potentially help early diagnosis of PDAC.
 
+Test subjects are divided into three different groups:
+
+- 1 = Healthy control subjects (183 samples)
+- 2 = Subjects with some beningn pancreatic disease (208 samples)
+- 3 = Subjects with a positive PDAC diagnosis (199 samples)
+
+The workflow of this study attempts to fit some probability distributions to each of the four protein levels in all three subject groups. This is done by choosing non- or weakly informative priors for the parameters of these target distributions. Using Stan, we then compute the likelihoods for our observations, and generate the resulting posterior distributions. Our hypothesis is, that the posterior distributions of at least some of the biomarkers differ considerably between healthy and PDAC-positive groups. We will also compare two different modeling approaches:
+
+- A pooled model, where we assume all three subject groups have the same prior distributions
+- A hierarchical model, where each prior has differently distributed hyperparameters
+
+Data analysis in the original paper was done using "classical" statistical learning theory and tests. To our knowledge, no other analyses have been performed on this dataset, so we can assume that this is the first time a Bayesian approach has been used on this case. 
 
 
 
 # References
 
-[1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
+- [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
+- [2] Debernardi S, O’Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case–control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
