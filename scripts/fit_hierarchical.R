@@ -7,6 +7,7 @@
 
 library(rstan)
 library(loo)
+library(ggplot2)
 
 data_path <- "Kurssit/Bayesian Data Analysis/Project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
@@ -63,3 +64,81 @@ for (i in 1:3) {
   diagnostics[i,2] = p_eff
   print(loo, plot_k = TRUE)
 }
+
+#Visualize posterior distributions
+
+draws <- as.data.frame(hier_fit)
+
+pCreatinine <- ggplot() + ggtitle('Posterior distribution of creatinine')
+x <- seq(0,5,0.05)
+for (i in seq(1,8000,200)) {
+  df1 <- data.frame(x=x,y=dgamma(x,draws$`alpha[1]`[i],draws$`beta[1]`[i]))
+  df2 <- data.frame(x=x,y=dgamma(x,draws$`alpha[2]`[i],draws$`beta[2]`[i]))
+  df3 <- data.frame(x=x,y=dgamma(x,draws$`alpha[3]`[i],draws$`beta[3]`[i]))
+  pCreatinine <- pCreatinine + 
+    geom_line(data=df1,aes(x,y), color="lightgreen",alpha=0.4) +    
+    geom_line(data=df2,aes(x,y), color="skyblue",alpha=0.4) +
+    geom_line(data=df3,aes(x,y), color="tomato",alpha=0.4)
+}
+pCreatinine
+
+pLYVE1 <- ggplot() + ggtitle('Posterior distribution of LYVE1')
+x <- seq(-15,15,0.1)
+for (i in seq(1,8000,200)) {
+  df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,1]`[i],draws$`sigma[1,1]`[i]))
+  df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,2]`[i],draws$`sigma[1,2]`[i]))
+  df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,3]`[i],draws$`sigma[1,3]`[i]))
+  pLYVE1 <- pLYVE1 + 
+    geom_line(data=df1,aes(x,y),col='lightgreen',alpha=0.4) +    
+    geom_line(data=df2,aes(x,y),col='skyblue',alpha=0.4) +
+    geom_line(data=df3,aes(x,y),col='tomato',alpha=0.4)
+}
+pLYVE1
+
+pREG1B <- ggplot() + ggtitle('Posterior distribution of REG1B')
+x <- seq(-10,15,0.1)
+for (i in seq(1,8000,200)) {
+  df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,1]`[i],draws$`sigma[2,1]`[i]))
+  df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,2]`[i],draws$`sigma[2,2]`[i]))
+  df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,3]`[i],draws$`sigma[2,3]`[i]))
+  pREG1B <- pREG1B + 
+    geom_line(data=df1,aes(x,y),col='lightgreen',alpha=0.4) +    
+    geom_line(data=df2,aes(x,y),col='skyblue',alpha=0.4) +
+    geom_line(data=df3,aes(x,y),col='tomato',alpha=0.4)
+}
+pREG1B
+
+pTFF1 <- ggplot() + ggtitle('Posterior distribution of TFF1')
+x <- seq(-3,15,0.1)
+for (i in seq(1,8000,200)) {
+  df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,1]`[i],draws$`sigma[3,1]`[i]))
+  df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,2]`[i],draws$`sigma[3,2]`[i]))
+  df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,3]`[i],draws$`sigma[3,3]`[i]))
+  pTFF1 <- pTFF1 + 
+    geom_line(data=df1,aes(x,y),col='lightgreen',alpha=0.4) +    
+    geom_line(data=df2,aes(x,y),col='skyblue',alpha=0.4) +
+    geom_line(data=df3,aes(x,y),col='tomato',alpha=0.4)
+}
+pTFF1
+
+#Posterior predictive check
+
+#Visualizing posterior predictive distributions
+stan_hist(hier_fit, pars = c('ypred_1[1]','ypred_1[2]','ypred_1[3]','ypred_1[4]'))
+stan_hist(hier_fit, pars = c('ypred_2[1]','ypred_2[2]','ypred_2[3]','ypred_2[4]'))
+stan_hist(hier_fit, pars = c('ypred_3[1]','ypred_3[2]','ypred_3[3]','ypred_3[4]'))
+
+#KESKEN
+
+plotPostCheck <- function(data, protein, diagnosis, ypred, N, bin){
+  p <- ggplot(data=data,aes(x=creatinine)) + 
+    geom_histogram(data=subset(data,diagnosis==diagnosis),fill='white', binwidth = bin)
+  for (j in 1:4) {
+    df <- data.frame(values=sample(ypred,N))
+    p <- p + geom_histogram(data=df,aes(x=values),fill=j, alpha = 0.2, binwidth = bin)
+  }
+  p
+}
+
+pPostCheck_C <- plotPostCheck(data,"creatinine",1,draws$`ypred_1[1]`,stan_data$N1,0.1)
+pPostCheck_C

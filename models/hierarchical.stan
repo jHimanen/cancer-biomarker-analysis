@@ -55,8 +55,8 @@ model {
   alpha ~ gamma(alphaP[1], betaP[1]);
   beta ~ gamma(alphaP[2], betaP[2]);
   for (j in 1:3){
-    mu[j] ~ normal(muP[1,j], sigmaP[1,j]);
-    sigma[j] ~ gamma(muP[2,j], sigmaP[2,j]);
+    mu[,j] ~ normal(muP[1,j], sigmaP[1,j]);
+    sigma[,j] ~ gamma(muP[2,j], sigmaP[2,j]);
   }
   // Likelihood
   y1[,1] ~ gamma(alpha[1], beta[1]);
