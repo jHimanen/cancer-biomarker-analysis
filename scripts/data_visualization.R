@@ -46,3 +46,14 @@ ggplot(data,aes(x=TFF1)) +
   geom_histogram(data=subset(data,diagnosis==1),fill = "green", alpha = 0.2, binwidth = 1) +
   geom_histogram(data=subset(data,diagnosis==2),fill = "blue", alpha = 0.2, binwidth = 1) +
   geom_histogram(data=subset(data,diagnosis==3),fill = "red", alpha = 0.2, binwidth = 1)
+
+#Plot prior distrbutions
+
+x <- seq(0,5,0.01)
+y1 <- dgamma(x,1,1)
+y2 <- dgamma(x,0.5,1)
+df <- data.frame(x,y1,y2)
+ggplot(data=df) + geom_line(aes(x,y1, colour ="Gamma(1,1)")) + geom_line(aes(x,y2,colour="Gamma(0.5,1)")) +
+  ylab('y') +
+  scale_color_manual(name = "Priors", values = c("Gamma(1,1)" = "darkblue", "Gamma(0.5,1)" = "red"))+
+  theme(legend.position=c(0.75,0.85))
