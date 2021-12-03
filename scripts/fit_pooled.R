@@ -109,31 +109,35 @@ stan_hist(pooled_fit, pars = c('ypred_3[1]','ypred_3[2]','ypred_3[3]','ypred_3[4
 
 #Drawing N1 samples from ypred1_[1] four times and plotting the histogram
 
-pPostCheck_C <- ggplot() + geom_histogram(data=data,aes(x=creatinine),fill='white', binwidth = 0.1)
+pPostCheck_C <- ggplot() + geom_histogram(data=data,aes(x=creatinine),fill='white',color="black", binwidth = 0.1) +
+  ggtitle("Replicated datasets of creatinine compared to the original data")
 for (j in 1:4) {
   df <- data.frame(values=sample(draws$`ypred_1[1]`,(stan_data$N1+stan_data$N2+stan_data$N3)))
-  pPostCheck_C <- pPostCheck_C + geom_histogram(data=df,aes(x=values),fill=j, alpha = 0.2, binwidth = 0.1)
+  pPostCheck_C <- pPostCheck_C + geom_histogram(data=df,aes(x=values),fill=j+1, alpha = 0.2, binwidth = 0.1)
 }
 pPostCheck_C 
 
-pPostCheck_L <- ggplot() + geom_histogram(data=data,aes(x=log(LYVE1)),fill='white', binwidth = 0.5)
+pPostCheck_L <- ggplot() + geom_histogram(data=data,aes(x=log(LYVE1)),fill='white',color="black", binwidth = 0.5) +
+  ggtitle("Replicated datasets of LYVE1 compared to the original data")
 for (j in 1:4) {
   df <- data.frame(values=sample(draws$`ypred_1[2]`,(stan_data$N1+stan_data$N2+stan_data$N3)))
-  pPostCheck_L <- pPostCheck_L + geom_histogram(data=df,aes(x=values),fill=j, alpha = 0.2, binwidth = 0.5)
+  pPostCheck_L <- pPostCheck_L + geom_histogram(data=df,aes(x=values),fill=j+1, alpha = 0.2, binwidth = 0.5)
 }
 pPostCheck_L
 
-pPostCheck_R <- ggplot() + geom_histogram(data=data,aes(x=log(REG1B)),fill='white', binwidth = 0.5)
+pPostCheck_R <- ggplot() + geom_histogram(data=data,aes(x=log(REG1B)),fill='white',color="black", binwidth = 0.5) +
+  ggtitle("Replicated datasets of REG1B compared to the original data")
 for (j in 1:4) {
   df <- data.frame(values=sample(draws$`ypred_1[3]`,(stan_data$N1+stan_data$N2+stan_data$N3)))
-  pPostCheck_R <- pPostCheck_R + geom_histogram(data=df,aes(x=values),fill=j, alpha = 0.2, binwidth = 0.5)
+  pPostCheck_R <- pPostCheck_R + geom_histogram(data=df,aes(x=values),fill=j+1, alpha = 0.2, binwidth = 0.5)
 }
 pPostCheck_R
 
-pPostCheck_T <- ggplot() + geom_histogram(data=data,aes(x=log(TFF1)),fill='white', binwidth = 0.5)
+pPostCheck_T <- ggplot() + geom_histogram(data=data,aes(x=log(TFF1)),fill='white', color="black", binwidth = 0.5) +
+  ggtitle("Replicated datasets of TFF1 compared to the original data")
 for (j in 1:4) {
   df <- data.frame(values=sample(draws$`ypred_1[4]`,(stan_data$N1+stan_data$N2+stan_data$N3)))
-  pPostCheck_T <- pPostCheck_T + geom_histogram(data=df,aes(x=values),fill=j, alpha = 0.2, binwidth = 0.5)
+  pPostCheck_T <- pPostCheck_T + geom_histogram(data=df,aes(x=values),fill=j+1, alpha = 0.2, binwidth = 0.5)
 }
 pPostCheck_T
 

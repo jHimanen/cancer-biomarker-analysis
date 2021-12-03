@@ -57,3 +57,5 @@ ggplot(data=df) + geom_line(aes(x,y1, colour ="Gamma(1,1)")) + geom_line(aes(x,y
   ylab('y') +
   scale_color_manual(name = "Priors", values = c("Gamma(1,1)" = "darkblue", "Gamma(0.5,1)" = "red"))+
   theme(legend.position=c(0.75,0.85))
+
+
