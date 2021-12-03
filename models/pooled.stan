@@ -15,6 +15,18 @@ data {
   vector[4] y3[N3];
 }
 
+transformed data {
+  vector[3] log_y1[N1];
+  vector[3] log_y2[N2];
+  vector[3] log_y3[N3];
+  
+  for (j in 1:3){
+    log_y1[,j] = log(y1[,j+1]);
+    log_y2[,j] = log(y2[,j+1]);
+    log_y3[,j] = log(y3[,j+1]);
+  }
+}
+
 parameters {
   real<lower=0> alpha;
   real<lower=0> beta;
@@ -35,9 +47,9 @@ model {
   y2[,1] ~ gamma(alpha, beta);
   y3[,1] ~ gamma(alpha, beta);
   for (j in 1:3) {
-    log(y1[,j+1]) ~ normal(mu[j], sigma[j]);
-    log(y2[,j+1]) ~ normal(mu[j], sigma[j]);
-    log(y3[,j+1]) ~ normal(mu[j], sigma[j]);
+    log_y1[,j] ~ normal(mu[j], sigma[j]);
+    log_y2[,j] ~ normal(mu[j], sigma[j]);
+    log_y3[,j] ~ normal(mu[j], sigma[j]);
   }
 }
 
@@ -59,7 +71,7 @@ generated quantities {
   for (j in 1:3) {
     ypred_1[j+1] = normal_rng(mu[j], sigma[j]);
     for (n in 1:N1) {
-      log_lik_1[n,j+1] = normal_lpdf(log(y1[n,j+1]) | mu[j], sigma[j]);
+      log_lik_1[n,j+1] = normal_lpdf(log_y1[n,j] | mu[j], sigma[j]);
     }
   }
   //Group 2
@@ -70,7 +82,7 @@ generated quantities {
   for (j in 1:3) {
     ypred_2[j+1] = normal_rng(mu[j], sigma[j]);
     for (n in 1:N2) {
-      log_lik_2[n,j+1] = normal_lpdf(log(y2[n,j+1]) | mu[j], sigma[j]);
+      log_lik_2[n,j+1] = normal_lpdf(log_y2[n,j] | mu[j], sigma[j]);
     }
   }
   //Group 3
@@ -81,7 +93,7 @@ generated quantities {
   for (j in 1:3) {
     ypred_3[j+1] = normal_rng(mu[j], sigma[j]);
     for (n in 1:N3) {
-      log_lik_3[n,j+1] = normal_lpdf(log(y3[n,j+1]) | mu[j], sigma[j]);
+      log_lik_3[n,j+1] = normal_lpdf(log_y3[n,j] | mu[j], sigma[j]);
     }
   }
 }
