@@ -9,7 +9,7 @@ library(rstan)
 library(loo)
 library(ggplot2)
 
-data_path <- "Kurssit/Bayesian Data Analysis/Project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
+data_path <-  '~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -29,7 +29,7 @@ stan_data <- list(
 
 # Fit the Stan model
 pooled_fit <- stan(
-  file = 'Kurssit/Bayesian Data Analysis/Project/cancer-biomarker-analysis/models/pooled.stan', # [pathtorepo] Replace with working path
+  file = '[pathtorepo]', # Replace with working path
   data = stan_data
 )
 

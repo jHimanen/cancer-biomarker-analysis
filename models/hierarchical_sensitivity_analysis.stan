@@ -16,6 +16,18 @@ data {
   vector[10] p;
 }
 
+transformed data {
+  vector[3] log_y1[N1];
+  vector[3] log_y2[N2];
+  vector[3] log_y3[N3];
+  
+  for (j in 1:3){
+    log_y1[,j] = log(y1[,j+1]);
+    log_y2[,j] = log(y2[,j+1]);
+    log_y3[,j] = log(y3[,j+1]);
+  }
+}
+
 parameters {
   // Hyperparamters
   real<lower=0> alphaP[2];
@@ -52,8 +64,8 @@ model {
   y2[,1] ~ gamma(alpha[2], beta[2]);
   y3[,1] ~ gamma(alpha[3], beta[3]);
   for (j in 1:3){
-    log(y1[,j+1]) ~ normal(mu[1,j], sigma[1,j]);
-    log(y2[,j+1]) ~ normal(mu[2,j], sigma[2,j]);
-    log(y3[,j+1]) ~ normal(mu[3,j], sigma[3,j]);
+    log_y1[,j] ~ normal(mu[1,j], sigma[1,j]);
+    log_y2[,j] ~ normal(mu[2,j], sigma[2,j]);
+    log_y3[,j] ~ normal(mu[3,j], sigma[3,j]);
   }
 }

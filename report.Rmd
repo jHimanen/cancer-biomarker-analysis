@@ -169,17 +169,23 @@ hier_fit <- stan(
 
 # 8 Posterior predictive checks
 
-Posterior predictive checks were completed visually in this project. The stan models include generation of predictive samples for each diagnosis group and protein. In general the posterior predictive check was done as follows. For both models, the same number of samples as in the original dataset was drawn several times. This samples were plotted as a histogram so that the distribution can be compared to the original histogram.
+Posterior predictive checks were completed visually in this project. The stan models include generation of predictive samples for each diagnosis group and protein. In general the posterior predictive check was done as follows. For both models, the same number of samples as in the original dataset was drawn four times. This samples were plotted as a histogram so that the distribution can be compared to the original histogram. Below you can find the figures. The original data is plotted as white histogram on the background and coloured histograms present the draws.
 
 ## Pooled model
 
-For the pooled model, we are using same parameters for each diagnosis group. Therefore, it is relevant to look at the data of each protein as one entity.
+For the pooled model, we are using same parameters for each diagnosis group. Therefore, it is relevant to look at the data of each protein as one entity. 
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for the pooled model", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_check_pooled_creatinine.png','./images/post_check_pooled_LYVE1.png', './images/post_check_pooled_REG1B.png', './images/post_check_pooled_TFF1.png'))
 ``` 
 
+We can see that for creatinine and REG1B replicated samples correspond to the original data quite well. For REG1B, the normal distribution cannot present the longer tail on the left that the actual data has. However, the overall fit is satisfying. LYVE1 and TFF1 cause more reason to worry since the original data, after log-transformation, has two spikes meaning the actual distribution would be multi-modal. The normal distribution does not replicate well compared to the data because it is rather a compromize between these two peaks. However, pooled model is already a combination of all of the diagnosis groups so it could be expected that the fits to the data are not as good.
+
 ## Hierarchical model
+
+For hierarchical model we obtain overall of twelve figures that are presented below grouped by the diagnosis group. Similarly as in the pooled model replicated data sets for creatinine and REG1B correspond quite well to the original data for each diagnosis group. The same issue for REG1B can be seen here as the skewness of the data cannot be taken into account with normal distribution. This is a clear improvement point but especially for diagnosis group 3 the fit is actually quite good and covers all the extreme values.
+
+For LYVE2 and TFF1 the same issue with two spikes in the data can still be seen, especially with diagnosis group 1 and 2. It is interesting to see that in diagnosis group 1 with healthy control group there is two clear peaks in the data. It would be a good issue to investigate more closely. On the other hand, the fit in diagnosis group 1 is maybe even better than in diagnosis group 2 since there the skewness of multi-model distribution makes the normal distribution very bad choice since it needs to be wide. For protein LYVE1 and diagnosis group 3, the fit is actually quite good even though there are some extreme values on the left that normal distribution cannot replicate. For TFF1, the issues are very similar but the other spike is not as large so the issues are not as strong. In general, the replicate data is better but there is still definitely room for improvement. It might be a good idea to fit multi-modal distribution insetad of normal distribution.
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnonsis 1 and the hierarchical model", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_check_hier_creatinine_1.png','./images/post_check_hier_LYVE1_1.png', './images/post_check_hier_REG1B_1.png', './images/post_check_hier_TFF1_1.png'))
@@ -197,9 +203,71 @@ knitr::include_graphics(c('./images/post_check_hier_creatinine_3.png','./images/
 
 # 10 Predictive performance assessment
 
+This model is not applicable for predictive assessment since it does not use predictors but rather describes the distributions and their differences. Only predictive aspect of the model might be predicting the protein levels of a person based on their diagnosis. But since we are not using any other predictors at this point, it is not relevant or interesting. The results of this model could be used to create a predictive model where the biomarkers are used to predict occurrence of the cancer. These results could guide on how the predictive model could be build and what kind of dependence there are between the cancer and the biomarkers.
+
 # 11 Sensitivity analysis
 
+Sensitivity analysis was carried out by comparing six different scenarios of priors for both models. In both cases, the different resulting posterior distributions were plotted and values of stan monitor checked. Sensitivity analysis was restricted to varying the parameters of the chosen prior distributions.
+
+## Pooled model
+
+For pooled model, the used scenarios are presented below in a table. In the first three scenarios, parameters values are varied only a little. The last three scenarios are extreme cases were the values have been changed drastically. 
+
+By looking at the figures we can see that only the scenarios with very large variation in the prior parameters differ seemingly from each other. For all the protein, only scenarios 5 and 6 are separate from other results. For creatinine, the changes are visible but not great. For other three proteins, only scenario 6 really fails to create similar posterior distribution. The reason for this is in the prior o the mean value of the normal distribution and we an safely say that $\mathcal{N}(-1000,1)$ is very unrealistic option. Overall, we can conclude that the model is very robust and not sensitive when varying the parameters of the prior distributions. In addition, the pooled model was fitted smoothly with all of the prior choices which was not the case with the hierarchical model as can be seen below.
+
+```{r echo = FALSE, results = 'asis'}
+library(knitr)
+S <- matrix(c(1,1,0.5,1,0,20,1,1,
+             2,2,1,2,0,10,2,2,
+             0.5,0.5,0.1,0.5,0,2,0.5,0.5,
+             0.01,0.01,0.01,0.01,10,1,0.01,0.01,
+             100,100,100,100,1000,1000,100,100,
+             100,0.01,100,0.01,-1000,1,100,0.01), ncol = 8, byrow = T)
+df <- data.frame(S)
+rownames(df) <- c('Scenario 1','Scenario 2','Scenario 3','Scenario 4','Scenario 5','Scenario 6')
+colnames(df) <- c('Shape of alpha', 'Scale of alpha','Shape of beta', 'Scale of beta',
+                  'Mean of mu^j', 'Deviation of mu^j','Shape of sigma^j', 'Scale of sigma^j')
+kable(df, caption='Scenarios for sensitivity analysis for pooled model',format.args = list(scientific = FALSE))
+```
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Sensitivity analysis for the pooled model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/SA_pooled_creatinine.png','./images/SA_pooled_LYVE1.png', './images/SA_pooled_REG1B.png', './images/SA_pooled_TFF1.png'))
+``` 
+
+
+## Hierarchical model
+
+The same way, we created six scenarios for hierarchical model. Scenarios are listed below in the table. The posterior distributions have been plotted so that each scenario has its one color and each diagnosis group different line type. Diagnosis 1 is plotted as dashed line, diagnosis 2 as double dashed line and diagnosis 3 as solid line.
+
+Similarly as in the pooled model, creatinine stays quite same for all the priors but scenarios 5 and 6 are somewhat separate from the others for each diagnosis group. The same kind of behavior can be seen for other proteins as well and even the scenario 6 can be fitted better than in the pooled model. We can conclude that the hierarchical model is not sensitive to the choice of prior parameters since only the unrealistically large changes can be seen in the resulting posterior distributions.
+
+On the other hand, it is noteworthy to say that even though the results end up to be rather good with strange prior distributions, the fitting of the model does not go as smoothly. There occurs a lot of problems initializing the Metropolis algorithm in scenarios 4, 5 and 6. This slows done the computations and might affect other diagnostics of the model. Therefore it is better to use more realistic priors.
+
+```{r echo = FALSE, results = 'asis'}
+library(knitr)
+S <- matrix(c(1,1,1,1,1,1,0,20,1,1,
+              2,2,2,2,2,2,0,10,2,2,
+              0.5,0.5,0.5,0.5,0.5,0.5,0,2,0.5,0.5,
+              0.01,0.01,0.01,0.01,0.01,0.01,10,1,0.01,0.01,
+              100,100,100,100,100,100,1000,1000,100,100,
+              100,0.01,100,0.01,100,0.01,-1000,1,100,0.01), ncol = 10, byrow = T)
+df <- data.frame(S)
+rownames(df) <- c('Scenario 1','Scenario 2','Scenario 3','Scenario 4','Scenario 5','Scenario 6')
+colnames(df) <- c('Shape of alpha_Pk', 'Scale of alpha_Pk','Shape of beta_Pk', 'Scale of beta_Pk',
+                  'Mean of mu_P1^j', 'Deviation of mu_P1^j','Shape of mu_P2^j', 'Scale of mu_P2^j',
+                  'Shape of sigma_Pk^j', 'Scale of sigma_Pk^j')
+kable(df, caption='Scenarios for sensitivity analysis for pooled model',format.args = list(scientific = FALSE))
+```
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Sensitivity analysis for the hierarchical model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/SA_hier_creatinine.png','./images/SA_hier_LYVE1.png', './images/SA_hier_REG1B.png', './images/SA_hier_TFF1.png'))
+``` 
+
 # 12 Discussion
+
+- The same issue for REG1B can be seen here as the skewness of the data cannot be taken into account with normal distribution -> skewed distribution on the negative values.
+
+- It is interesting to see that in diagnosis group 1 with healthy control group there is two clear peaks in the data. It would be a good issue to investigate more closely.
+
+- LYVE1 and TFF1 -> It might be a good idea to fit multi-modal distribution instead of normal distribution. But risk for over-fitting, need to find predictors (creatinine) and reasons for multi-modality.
 
 # 13 Conclusion 
 
