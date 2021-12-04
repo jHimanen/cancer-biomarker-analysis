@@ -10,7 +10,7 @@ library(rstan)
 library(loo)
 library(ggplot2)
 
-data_path <- '.../Debernardi et al 2020 data.csv' # Replace with working path
+data_path <- '.../Debernardi et al 2020 data.csv' # REPLACE WITH WORKING PATH
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -30,7 +30,7 @@ stan_data <- list(
 
 # Fit the Stan model
 pooled_fit <- stan(
-  file = '.../cancer-biomarker-analysis/models/pooled.stan', # Replace with working path
+  file = '.../cancer-biomarker-analysis/models/pooled.stan', # REPLACE WITH WORKING PATH
   data = stan_data
 )
 
@@ -38,7 +38,7 @@ pooled_fit <- stan(
 results <- monitor(pooled_fit)
 selected_res <- results[c(1:20), c('mean', 'sd', 'n_eff', 'Rhat', 'Q5', 'Q50', 'Q95')]
 res_df <- as.data.frame(selected_res)
-write.csv(res_df,'.../cancer-biomarker-analysis/diagnostic_data/pooled_res.csv') # Replace with working path
+write.csv(res_df,'.../cancer-biomarker-analysis/diagnostic_data/pooled_res.csv') # REPLACE WITH WORKING PATH
 
 # Extract log-likelihoods for LOO evaluation
 log_liks <- list(
@@ -50,7 +50,7 @@ log_liks <- list(
 # Initialize the diagnostics matrix
 diagnostics <- matrix(0, nrow = 3, ncol = 2,
                       dimnames = list(
-                        c('Group 1', 'Group2', 'Group 3'),
+                        c('Group 1', 'Group 2', 'Group 3'),
                         c('ELPD', 'P_eff')
                       )
 )
@@ -71,7 +71,7 @@ for (i in 1:3) {
 }
 
 pool_eval <- as.data.frame(diagnostics)
-write.csv(pool_eval, '.../cancer-biomarker-analysis/diagnostic_data/pool_eval.csv')
+write.csv(pool_eval, '.../cancer-biomarker-analysis/diagnostic_data/pooled_eval.csv') # REPLACE WITH WORKING PATH
 
 # Visualize posterior distributions
 

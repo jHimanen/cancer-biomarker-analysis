@@ -10,7 +10,7 @@ library(rstan)
 library(loo)
 library(ggplot2)
 
-data_path <- ".../Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
+data_path <- '.../Debernardi et al 2020 data.csv' # REPLACE WITH WORKING PATH
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -30,7 +30,7 @@ stan_data <- list(
 
 # Fit the Stan model
 hier_fit <- stan(
-  file = '.../cancer-biomarker-analysis/models/hierarchical.stan', # /[pathtorepo] Replace with working path
+  file = '.../cancer-biomarker-analysis/models/hierarchical.stan', # REPLACE WITH WORKING PATH
   data = stan_data,
   iter = 4000,
   control = list(adapt_delta = 0.99)
@@ -40,7 +40,7 @@ hier_fit <- stan(
 results <- monitor(hier_fit)
 selected_res <- results[c(1:40), c('mean', 'sd', 'n_eff', 'Rhat', 'Q5', 'Q50', 'Q95')]
 res_df <- as.data.frame(selected_res)
-write.csv(res_df,'.../cancer-biomarker-analysis/diagnostic_data/hier_res.csv')
+write.csv(res_df,'.../cancer-biomarker-analysis/diagnostic_data/hier_res.csv') # REPLACE WITH WORKING PATH
 
 # Extract log-likelihoods for LOO evaluation
 log_liks <- list(
@@ -52,7 +52,7 @@ log_liks <- list(
 # Initialize the diagnostics matrix
 diagnostics <- matrix(0, nrow = 3, ncol = 2,
                       dimnames = list(
-                        c('Group 1', 'Group2', 'Group 3'),
+                        c('Group 1', 'Group 2', 'Group 3'),
                         c('ELPD', 'P_eff')
                       )
 )
@@ -73,9 +73,9 @@ for (i in 1:3) {
 }
 
 hier_eval <- as.data.frame(diagnostics)
-write.csv(hier_eval, '.../cancer-biomarker-analysis/diagnostic_data/hier_eval.csv')
+write.csv(hier_eval, '.../cancer-biomarker-analysis/diagnostic_data/hier_eval.csv') # REPLACE WITH WORKING PATH
 
-#Visualize posterior distributions
+# Visualize posterior distributions
 
 draws <- as.data.frame(hier_fit)
 
@@ -131,9 +131,9 @@ for (i in seq(1,8000,200)) {
 }
 pTFF1
 
-#Posterior predictive check
+# Posterior predictive check
 
-#Visualizing posterior predictive distributions
+# Visualizing posterior predictive distributions
 stan_hist(hier_fit, pars = c('ypred_1[1]','ypred_1[2]','ypred_1[3]','ypred_1[4]'))
 stan_hist(hier_fit, pars = c('ypred_2[1]','ypred_2[2]','ypred_2[3]','ypred_2[4]'))
 stan_hist(hier_fit, pars = c('ypred_3[1]','ypred_3[2]','ypred_3[3]','ypred_3[4]'))

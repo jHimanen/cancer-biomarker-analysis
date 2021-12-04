@@ -2,7 +2,11 @@
 title: 'A Bayesian approach to analyzing urinary biomarkers for pancreatic cancer'
 author: "Noora Torpo, Joel Himanen"
 date: "11/25/2021"
-output: pdf_document
+output:
+  rmarkdown::pdf_document:
+    fig_caption: yes        
+    includes:  
+      in_header: preamble-latex.tex
 editor_options: 
   markdown: 
     wrap: sentence
@@ -36,7 +40,7 @@ This study focuses on conducting Bayesian inference on a data set, which holds m
 We aim to model the biomarker levels using prior information to generate posterior distributions using two different approaches in Stan and R.
 The goal is to see if and how the distributions for the different biomarkers differ between healthy and positively diagnosed test subjects.
 
-# 2 Data & workflow
+# 2 Data and workflow
 
 The data used in this study dates back to research done by Debernardi et al. in 20020.[2] The set includes information and measurements from 590 test subjects, the measurements considered in this study being amounts of four different proteins measured from urine samples:
 
@@ -144,7 +148,7 @@ For the hierarchical model, we need to define prior distributions for the hyperp
 
 # 5 Stan code
 
-# 6 Fitting the models
+# 6 Fitting and convergence diagnostics
 
 Both of the models were first run with the default options of the `rstan::stan()` function, that is
 
@@ -179,9 +183,9 @@ hier_res <- read.csv('./diagnostic_data/hier_res.csv')
 print(hier_res[c(17:40),c(1:5)])
 ```
 
-Judging by the effective sample sizes and $\hat{R}$ values, the hierarchical model seems to converge after even better than the pooled one (after the corrections to the sampling options). However, we need to keep in mind the divergence warning we were not able to get rid of completely. All of the model parameter estimations show neat convergence, so we can conclude that some of the log-likelihood estimations diverge.
+Judging by the effective sample sizes and $\hat{R}$ values, the hierarchical model seems to converge even better than the pooled one (after the corrections to the sampling options). However, we need to keep in mind the divergence warning we were not able to get rid of completely. All of the model parameter estimations show neat convergence, so we can conclude that some of the log-likelihood estimations diverge.
 
-# 8 Posterior predictive checks
+# 7 Posterior predictive checks
 
 Posterior predictive checks were completed visually in this project. The stan models include generation of predictive samples for each diagnosis group and protein. In general the posterior predictive check was done as follows. For both models, the same number of samples as in the original dataset was drawn several times. This samples were plotted as a histogram so that the distribution can be compared to the original histogram.
 
@@ -195,29 +199,77 @@ knitr::include_graphics(c('./images/post_check_pooled_creatinine.png','./images/
 
 ## Hierarchical model
 
-```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnonsis 1 and the hierarchical model", fig.show='hold', fig.align='center'}
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnosis 1 and the hierarchical model", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_check_hier_creatinine_1.png','./images/post_check_hier_LYVE1_1.png', './images/post_check_hier_REG1B_1.png', './images/post_check_hier_TFF1_1.png'))
 ``` 
 
-```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnonsis 2 and the hierarchical model", fig.show='hold', fig.align='center'}
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnosis 2 and the hierarchical model", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_check_hier_creatinine_2.png','./images/post_check_hier_LYVE1_2.png', './images/post_check_hier_REG1B_2.png', './images/post_check_hier_TFF1_2.png'))
 ``` 
 
-```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnonsis 3 and the hierarchical model", fig.show='hold', fig.align='center'}
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnosis 3 and the hierarchical model", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_check_hier_creatinine_3.png','./images/post_check_hier_LYVE1_3.png', './images/post_check_hier_REG1B_3.png', './images/post_check_hier_TFF1_3.png'))
 ``` 
 
-# 9 Model comparison
+# 8 Model comparison
 
-# 10 Predictive performance assessment
+In the Stan models, we generate the log-likelihoods for the posterior draws, which are required in order to perform Leave one out -cross validation with Pareto-smoothed importance sampling (PSIS-LOO) to compare the two models (pooled and hierarchical). After extracting the log-likelihoods from the Stan fit, we proceed to perform PSIS-LOO using the `loo` package, store the results in the `diagnostics` matrix, and plot the pareto-k values. In the case of the hierarchical model, the procedure looks like this:
 
-# 11 Sensitivity analysis
+```{r, eval=FALSE}
+# Initialize the diagnostics matrix
+diagnostics <- matrix(0, nrow = 3, ncol = 2,
+                      dimnames = list(
+                        c('Group 1', 'Group 2', 'Group 3'),
+                        c('ELPD', 'P_eff')
+                      )
+)
 
-# 12 Discussion
+# Compute diagnostics for each group
+for (i in 1:3) {
+  log_lik <- log_liks[[i]]
+  r_eff <- relative_eff(exp(log_lik)) # Relative efficiency
+  loo <- loo(log_lik, r_eff=r_eff) # LOO object
+  
+  estimates <- loo$estimates
+  elpd <- estimates[1,1] # PSIS-LOO value
+  p_eff <- estimates[2,1] # Effective number of parameters
+  
+  diagnostics[i,1] = elpd
+  diagnostics[i,2] = p_eff
+  print(loo, plot_k = TRUE)
+}
+```
 
-# 13 Conclusion 
+Below are the PSIS-LOO ELPD values and effective numbers of parameters for the pooled and hierarchical model, respectively.
 
-# 14 Self-reflection
+```{r, echo=FALSE}
+pooled_eval <- read.csv('./diagnostic_data/pooled_eval.csv')
+hier_eval <- read.csv('./diagnostic_data/hier_eval.csv')
+print(pooled_eval)
+print(hier_eval)
+```
+
+To evaluate how reliable our PSIS-LOO evaluations are, we need to take a look at all the respective pareto-k values.
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Pareto-k values for each test subject group in the pooled model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/pooled1_pareto_k.png','./images/pooled2_pareto_k.png', './images/pooled3_pareto_k.png'))
+```
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Pareto-k values for each test subject group in the hierarchical model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/hier1_pareto_k.png','./images/hier2_pareto_k.png', './images/hier3_pareto_k.png'))
+``` 
+
+The k-values for the pooled model are excellent, there are no values above 0.5. Therefore, the ELPD-estimate in this case can be considered reliable. In the hierarchical case, the k-values seem to be in order as well, except for a single bad value in both group 1 and 3. This may be due to the divergences mentioned in chapter 6, since we concluded that the problems lie with the posterior draw log-likelihoods, which are utilized by PSIS-LOO. However, we concluded that a single bad pareto-k value is an uncertainty we can accept. It just needs to be taken into account, when using the results of our model comparison.
+
+# 9 Predictive performance assessment
+
+# 10 Sensitivity analysis
+
+# 11 Discussion
+
+# 12 Conclusion 
+
+# 13 Self-reflection
 
 
 # References
