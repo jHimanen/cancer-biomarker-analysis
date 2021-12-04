@@ -152,9 +152,16 @@ Both of the models were first run with the default options of the `rstan::stan()
 - Chain length: 2000
 - Warmup length: floor(chain length / 2)
 
-The pooled model seemed to converge excellently with the default options. There were no divergences and all $\hat{R}$ values differed from 1 by no more than roughly $10^{-2}$, so there was no need to tweak the options in this case.
+Below is part of the output (due to generation of log-likelihoods, the whole output has over 2000 rows) of `monitor(pooled_fit)`:
 
-The fitting of the hierarchical model raised a warning that we had a bit over 200 divergent post-warmup transitions. Our first attempt to get that number down was to double the chain length, which seemed to have at least some positive effect. Then we lowered the sampling step size by setting the `adapt_delta` parameter to 0.99. This had a very good effect, and we were able to get the number of divergences to under 20. At this point, we decided to accept the result. Below is an example code block, showing how the hierarchical model was run.
+```{r, echo=FALSE}
+pooled_res <- read.csv('./diagnostic_data/pooled_res.csv')
+print(pooled_res[c(1:8),c(1:5)])
+```
+
+As we can see from the output, the pooled model seems to converge excellently with the default options. There are zero divergences, all $\hat{R}$ values differ from 1 by no more than roughly $10^{-3}$, and the effective sample sizes are above 3000. Hence, there was no need to tweak the options in this case. 
+
+The fitting of the hierarchical model with default options raises a warning of a bit over 200 divergent post-warmup transitions Our first attempt to get that number down was to double the chain length, which seemed to have at least some positive effect. Then we lowered the sampling step size by setting the `adapt_delta` parameter to 0.99. This had a very good effect, and we were able to get the number of divergences to under 20. At this point, we decided to accept the result. Below is an example code block, showing how the hierarchical model was run.
 
 ```{r, eval=FALSE}
 hier_fit <- stan(
@@ -165,7 +172,14 @@ hier_fit <- stan(
 )
 ```
 
-# 7 Convergence diagnostics
+A similar glance to the monitor output, as with the pooled model, yields the following:
+
+```{r, echo=FALSE}
+hier_res <- read.csv('./diagnostic_data/hier_res.csv')
+print(hier_res[c(17:40),c(1:5)])
+```
+
+Judging by the effective sample sizes and $\hat{R}$ values, the hierarchical model seems to converge after even better than the pooled one (after the corrections to the sampling options). However, we need to keep in mind the divergence warning we were not able to get rid of completely. All of the model parameter estimations show neat convergence, so we can conclude that some of the log-likelihood estimations diverge.
 
 # 8 Posterior predictive checks
 
@@ -193,7 +207,7 @@ knitr::include_graphics(c('./images/post_check_hier_creatinine_2.png','./images/
 knitr::include_graphics(c('./images/post_check_hier_creatinine_3.png','./images/post_check_hier_LYVE1_3.png', './images/post_check_hier_REG1B_3.png', './images/post_check_hier_TFF1_3.png'))
 ``` 
 
-# 9 Model comaprison
+# 9 Model comparison
 
 # 10 Predictive performance assessment
 

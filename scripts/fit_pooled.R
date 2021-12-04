@@ -1,15 +1,16 @@
-############################################
+##############################################
 # This is an R script used to fit the
-# pooled Stan model and compute model
-# evaluation diagnostics for the "Urinary
+# pooled Stan model and compute convergence, 
+# model evaluation, and posterior predictive
+# diagnostics for the "Urinary
 # biomarkers for pancreatic cancer" dataset.
-############################################
+##############################################
 
 library(rstan)
 library(loo)
 library(ggplot2)
 
-data_path <- "~/Code/courses/BDA/project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
+data_path <- '.../Debernardi et al 2020 data.csv' # Replace with working path
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -29,12 +30,15 @@ stan_data <- list(
 
 # Fit the Stan model
 pooled_fit <- stan(
-  file = '~/Code/courses/BDA/project/cancer-biomarker-analysis/models/pooled.stan', # [pathtorepo] Replace with working path
+  file = '.../cancer-biomarker-analysis/models/pooled.stan', # Replace with working path
   data = stan_data
 )
 
+# Store convergence diagnostics
 results <- monitor(pooled_fit)
 selected_res <- results[c(1:20), c('mean', 'sd', 'n_eff', 'Rhat', 'Q5', 'Q50', 'Q95')]
+res_df <- as.data.frame(selected_res)
+write.csv(res_df,'.../cancer-biomarker-analysis/diagnostic_data/pooled_res.csv') # Replace with working path
 
 # Extract log-likelihoods for LOO evaluation
 log_liks <- list(
@@ -66,7 +70,10 @@ for (i in 1:3) {
   print(loo, plot_k = TRUE)
 }
 
-#Visualize posterior distributions
+pool_eval <- as.data.frame(diagnostics)
+write.csv(pool_eval, '.../cancer-biomarker-analysis/diagnostic_data/pool_eval.csv')
+
+# Visualize posterior distributions
 
 draws <- as.data.frame(pooled_fit)
 
@@ -102,15 +109,15 @@ for (i in seq(1,4000,100)) {
 }
 pTFF1
 
-#Posterior predictive check
+# Posterior predictive check
 
-#Visualizing posterior predictive distributions
-#Note that ypred_i are from same distributions
+# Visualizing posterior predictive distributions
+# Note that ypred_i are from same distributions
 stan_hist(pooled_fit, pars = c('ypred_1[1]','ypred_1[2]','ypred_1[3]','ypred_1[4]'))
 stan_hist(pooled_fit, pars = c('ypred_2[1]','ypred_2[2]','ypred_2[3]','ypred_2[4]'))
 stan_hist(pooled_fit, pars = c('ypred_3[1]','ypred_3[2]','ypred_3[3]','ypred_3[4]'))
 
-#Drawing N1 samples from ypred1_[1] four times and plotting the histogram
+# Drawing N1 samples from ypred1_[1] four times and plotting the histogram
 
 pPostCheck_C <- ggplot() + geom_histogram(data=data,aes(x=creatinine),fill='white',color="black", binwidth = 0.1) +
   ggtitle("Replicated datasets of creatinine compared to the original data")
