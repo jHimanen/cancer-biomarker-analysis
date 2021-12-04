@@ -1,15 +1,16 @@
-############################################
+##################################################
 # This is an R script used to fit the
-# hierarchical Stan model and compute model
-# evaluation diagnostics for the "Urinary
+# hierarchical Stan model and compute convergence, 
+# model evaluation, and posterior predictive
+# diagnostics for the "Urinary
 # biomarkers for pancreatic cancer" dataset.
-############################################
+##################################################
 
 library(rstan)
 library(loo)
 library(ggplot2)
 
-data_path <- "Kurssit/Bayesian Data Analysis/Project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
+data_path <- ".../Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -29,11 +30,17 @@ stan_data <- list(
 
 # Fit the Stan model
 hier_fit <- stan(
-  file = 'Kurssit/Bayesian Data Analysis/Project/cancer-biomarker-analysis/models/hierarchical.stan', # /[pathtorepo] Replace with working path
+  file = '.../cancer-biomarker-analysis/models/hierarchical.stan', # /[pathtorepo] Replace with working path
   data = stan_data,
   iter = 4000,
   control = list(adapt_delta = 0.99)
 )
+
+# Store convergence diagnostics
+results <- monitor(hier_fit)
+selected_res <- results[c(1:40), c('mean', 'sd', 'n_eff', 'Rhat', 'Q5', 'Q50', 'Q95')]
+res_df <- as.data.frame(selected_res)
+write.csv(res_df,'.../cancer-biomarker-analysis/diagnostic_data/hier_res.csv')
 
 # Extract log-likelihoods for LOO evaluation
 log_liks <- list(
@@ -64,6 +71,9 @@ for (i in 1:3) {
   diagnostics[i,2] = p_eff
   print(loo, plot_k = TRUE)
 }
+
+hier_eval <- as.data.frame(diagnostics)
+write.csv(hier_eval, '.../cancer-biomarker-analysis/diagnostic_data/hier_eval.csv')
 
 #Visualize posterior distributions
 
