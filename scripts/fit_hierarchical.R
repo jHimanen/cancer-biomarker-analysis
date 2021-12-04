@@ -128,17 +128,71 @@ stan_hist(hier_fit, pars = c('ypred_1[1]','ypred_1[2]','ypred_1[3]','ypred_1[4]'
 stan_hist(hier_fit, pars = c('ypred_2[1]','ypred_2[2]','ypred_2[3]','ypred_2[4]'))
 stan_hist(hier_fit, pars = c('ypred_3[1]','ypred_3[2]','ypred_3[3]','ypred_3[4]'))
 
-#KESKEN
-
-plotPostCheck <- function(data, protein, diagnosis, ypred, N, bin){
-  p <- ggplot(data=data,aes(x=creatinine)) + 
-    geom_histogram(data=subset(data,diagnosis==diagnosis),fill='white', binwidth = bin)
+plotPostCheck <- function(dataCol, ypred, N, bin, title, xlabel){
+  df<- data.frame(values=dataCol)
+  p <- ggplot() + 
+    geom_histogram(data=df,aes(x=values),fill='white',color="black", binwidth = bin) +
+    ggtitle(title) + xlab(xlabel)
   for (j in 1:4) {
     df <- data.frame(values=sample(ypred,N))
-    p <- p + geom_histogram(data=df,aes(x=values),fill=j, alpha = 0.2, binwidth = bin)
+    p <- p + geom_histogram(data=df,aes(x=values),fill=j+1, alpha = 0.2, binwidth = bin)
   }
   p
 }
 
-pPostCheck_C <- plotPostCheck(data,"creatinine",1,draws$`ypred_1[1]`,stan_data$N1,0.1)
-pPostCheck_C
+#Creatinine
+pPostCheck_C1 <- plotPostCheck(data[data$diagnosis==1,]$creatinine,draws$`ypred_1[1]`,stan_data$N1,0.1,
+                              "Replicated datasets of creatinine compared to the original data for diagnosis 1",
+                              "creatinine")
+pPostCheck_C1
+pPostCheck_C2 <- plotPostCheck(data[data$diagnosis==2,]$creatinine,draws$`ypred_2[1]`,stan_data$N2,0.1,
+                               "Replicated datasets of creatinine compared to the original data for diagnosis 2 ",
+                               "creatinine")
+pPostCheck_C2
+pPostCheck_C3 <- plotPostCheck(data[data$diagnosis==3,]$creatinine,draws$`ypred_3[1]`,stan_data$N3,0.1,
+                               "Replicated datasets of creatinine compared to the original data for diagnosis 3",
+                               "creatinine")
+pPostCheck_C3
+
+#LYVE1
+pPostCheck_L1 <- plotPostCheck(log(data[data$diagnosis==1,]$LYVE1),draws$`ypred_1[2]`,stan_data$N1,0.5,
+                               "Replicated datasets of LYVE1 compared to the original data for diagnosis 1",
+                               "log(LYVE1)")
+pPostCheck_L1
+pPostCheck_L2 <- plotPostCheck(log(data[data$diagnosis==2,]$LYVE1),draws$`ypred_2[2]`,stan_data$N2,0.5,
+                               "Replicated datasets of LYVE1 compared to the original data for diagnosis 2",
+                               "log(LYVE1)")
+pPostCheck_L2
+pPostCheck_L3 <- plotPostCheck(log(data[data$diagnosis==3,]$LYVE1),draws$`ypred_3[2]`,stan_data$N3,0.5,
+                               "Replicated datasets of LYVE1 compared to the original data for diagnosis 3",
+                               "log(LYVE1)")
+pPostCheck_L3
+
+#REG1B
+pPostCheck_R1 <- plotPostCheck(log(data[data$diagnosis==1,]$REG1B),draws$`ypred_1[3]`,stan_data$N1,0.5,
+                               "Replicated datasets of REG1B compared to the original data for diagnosis 1",
+                               "log(REG1B)")
+pPostCheck_R1
+pPostCheck_R2 <- plotPostCheck(log(data[data$diagnosis==2,]$REG1B),draws$`ypred_2[3]`,stan_data$N2,0.5,
+                               "Replicated datasets of REG1B compared to the original data for diagnosis 2",
+                               "log(REG1B)")
+pPostCheck_R2
+pPostCheck_R3 <- plotPostCheck(log(data[data$diagnosis==3,]$REG1B),draws$`ypred_3[3]`,stan_data$N2,0.5,
+                               "Replicated datasets of REG1B compared to the original data for diagnosis 3",
+                               "log(REG1B)")
+pPostCheck_R3
+
+#TFF1
+pPostCheck_T1 <- plotPostCheck(log(data[data$diagnosis==1,]$TFF1),draws$`ypred_1[4]`,stan_data$N1,1,
+                               "Replicated datasets of TFF1 compared to the original data for diagnosis 1",
+                               "log(TFF1)")
+pPostCheck_T1
+pPostCheck_T2 <- plotPostCheck(log(data[data$diagnosis==2,]$TFF1),draws$`ypred_2[4]`,stan_data$N2,1,
+                               "Replicated datasets of TFF1 compared to the original data for diagnosis 2",
+                               "log(TFF1)")
+pPostCheck_T2
+pPostCheck_T3 <- plotPostCheck(log(data[data$diagnosis==3,]$TFF1),draws$`ypred_3[4]`,stan_data$N3,1,
+                               "Replicated datasets of TFF1 compared to the original data for diagnosis 3",
+                               "log(TFF1)")
+pPostCheck_T3
+

@@ -132,17 +132,19 @@ $$
 
 In general, the models required two kind of prior distributions. For parameters of gamma distribution, it is essentials to keep them positive which narrows the possible choice of priors. As presented in the course books Bayesian Data Analysis, gamma distribution is a conjugate prior for exponential model. Therefore, gamma distribution was natural choice for prior distributions for both parameters $\alpha$ and $\beta$ for creatinine. The gamma distribution is easily quite narrow so we decided to consider informative priors but aim for enough flexibility in the model. 
 
-The first parameter of gamma distribution $\alpha$ determines the shape of the distribution and the second parameter $\beta$ the scale. After considering creatinine data, we decided to roughly aim for expected value of 1 for the shape and expected value of 0.5 for the scale parameter. The expected value of gamma distribution is calculated as $\frac{\alpha}{\beta}$ so possible prior distributions would be $\Gamma(1,1)$ and $\Gamma(0.5,1)$. For gamma distribution, small values for the parametrs work well since the shape stays non specific. The distributions are plotted below.
+The first parameter of gamma distribution $\alpha$ determines the shape of the distribution and the second parameter $\beta$ the scale. After considering creatinine data, we decided to roughly aim for expected value of 1 for the shape and expected value of 0.5 for the scale parameter. The expected value of gamma distribution is calculated as $\frac{\alpha}{\beta}$ so possible prior distributions would be $\Gamma(1,1)$ and $\Gamma(0.5,1)$. For gamma distribution, small values for the parameters work well since the shape stays non specific. The distributions are plotted below.
 
-```{r, echo=FALSE, out.width="60%", out.height="30%", fig.cap="Histograms of the observed data", fig.show='hold', fig.align='center'}
+```{r, echo=FALSE, out.width="60%", out.height="30%", fig.cap="Piror distributions", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/gamma_priors.png'))
 ``` 
 
 For other three proteins, we are fitting Gaussian model. It is important to note that we are fitting similar model to each of the protein LYVE1, REG1B and TFF1 but they are not connected to each other. We need a prior distributions for the mean value and for the standard deviation. The prior of the mean is chosen so that it is sensible but not restricting. In part 2, we have seen that the values of all three proteins after logarithmic transformation, obtain both negative and positive values. This is why we will choose the mean of the prior of the parameter $\mu$ as 0. To be able to easily adjust to the data we will chose large value for the standard deviation as 20. Hence the prior distribution for the mean is $\mathcal{N}(0,20)$. In sensitivity analysis, we will notice that the choice of the standard deviation does not affect the result strongly as long as it is wide enough. The prior distribution for $\sigma$ is chosen as $\Gamma(1,1)$ so that it stays positive and gives wide enough range of values.
 
-For hierarchical model, we need to define prior distributions for the hyperparametrs. Here we use same logic as above and choose prior distributions for all the hyperparameters that are required to be positive as $\Gamma(1,1)$ and hyperparameter of the mean of the normal distribution as $\mathcal{N}(0,20)$. These priors provide enough flexibility because as hyperprior the resulting distributions for the group specific parameters can differ more. 
+For the hierarchical model, we need to define prior distributions for the hyperparameters. Here we use same logic as above and choose prior distributions for all the hyperparameters that are required to be positive as $\Gamma(1,1)$ and hyperparameter of the mean of the normal distribution as $\mathcal{N}(0,20)$. These priors provide enough flexibility because as hyperprior the resulting distributions for the group specific parameters can differ more. 
 
-# N Fitting the models
+# 5 Stan code
+
+# 6 Fitting the models
 
 Both of the models were first run with the default options of the `rstan::stan()` function, that is
 
@@ -162,6 +164,46 @@ hier_fit <- stan(
   control = list(adapt_delta = 0.99)
 )
 ```
+
+# 7 Convergence diagnostics
+
+# 8 Posterior predictive checks
+
+Posterior predictive checks were completed visually in this project. The stan models include generation of predictive samples for each diagnosis group and protein. In general the posterior predictive check was done as follows. For both models, the same number of samples as in the original dataset was drawn several times. This samples were plotted as a histogram so that the distribution can be compared to the original histogram.
+
+## Pooled model
+
+For the pooled model, we are using same parameters for each diagnosis group. Therefore, it is relevant to look at the data of each protein as one entity.
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for the pooled model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_check_pooled_creatinine.png','./images/post_check_pooled_LYVE1.png', './images/post_check_pooled_REG1B.png', './images/post_check_pooled_TFF1.png'))
+``` 
+
+## Hierarchical model
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnonsis 1 and the hierarchical model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_check_hier_creatinine_1.png','./images/post_check_hier_LYVE1_1.png', './images/post_check_hier_REG1B_1.png', './images/post_check_hier_TFF1_1.png'))
+``` 
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnonsis 2 and the hierarchical model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_check_hier_creatinine_2.png','./images/post_check_hier_LYVE1_2.png', './images/post_check_hier_REG1B_2.png', './images/post_check_hier_TFF1_2.png'))
+``` 
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnonsis 3 and the hierarchical model", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_check_hier_creatinine_3.png','./images/post_check_hier_LYVE1_3.png', './images/post_check_hier_REG1B_3.png', './images/post_check_hier_TFF1_3.png'))
+``` 
+
+# 9 Model comaprison
+
+# 10 Predictive performance assessment
+
+# 11 Sensitivity analysis
+
+# 12 Discussion
+
+# 13 Conclusion 
+
+# 14 Self-reflection
 
 
 # References
