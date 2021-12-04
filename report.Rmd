@@ -33,7 +33,7 @@ Pancreatic cancer, or more accurately, its most common form, *Pancreatic ductal 
 It is often diagnosed at a very late stage, which, combined to its heterogenous base of genetic mutations, leads to an average 5-year survival rate of less than 10%.[1] Therefore, research on early signs of PDAC can be considered to be of utmost importance.
 
 This study focuses on conducting Bayesian inference on a data set, which holds measurements of potential biomarkers for PDAC.
-We aim to model the biomarker levels using weakly informative priors to generate posterior distributions using two different approaches in Stan and R.
+We aim to model the biomarker levels using prior information to generate posterior distributions using two different approaches in Stan and R.
 The goal is to see if and how the distributions for the different biomarkers differ between healthy and positively diagnosed test subjects.
 
 # 2 Data & workflow
@@ -60,7 +60,7 @@ knitr::include_graphics(c('./images/creatinine_data.png','./images/lyve1_data.pn
 ``` 
 
 The workflow of this study attempts to fit some probability distributions to each of the four protein levels in all three subject groups.
-This is done by choosing non- or weakly informative priors for the parameters of these target distributions.
+This is done by choosing weakly to somewhat informative priors for the parameters of these target distributions.
 Using Stan, we then compute the likelihoods for our observations, and generate the resulting posterior distributions.
 Our hypothesis is, that the posterior distributions of at least some of the biomarkers differ considerably between healthy and PDAC-positive groups.
 We will also compare two different modeling approaches:
@@ -140,7 +140,7 @@ knitr::include_graphics(c('./images/gamma_priors.png'))
 
 For other three proteins, we are fitting Gaussian model. It is important to note that we are fitting similar model to each of the protein LYVE1, REG1B and TFF1 but they are not connected to each other. We need a prior distributions for the mean value and for the standard deviation. The prior of the mean is chosen so that it is sensible but not restricting. In part 2, we have seen that the values of all three proteins after logarithmic transformation, obtain both negative and positive values. This is why we will choose the mean of the prior of the parameter $\mu$ as 0. To be able to easily adjust to the data we will chose large value for the standard deviation as 20. Hence the prior distribution for the mean is $\mathcal{N}(0,20)$. In sensitivity analysis, we will notice that the choice of the standard deviation does not affect the result strongly as long as it is wide enough. The prior distribution for $\sigma$ is chosen as $\Gamma(1,1)$ so that it stays positive and gives wide enough range of values.
 
-For hierarchical model, we need to define prior distributions for the hyperparametrs. Here we use same logic as above and choose prior distributions for all the hyperparameters that are required to be positive as $\Gamma(1,1)$ and hyperparameter of the mean of the normal distribution as \mathcal{N}(0,20)$. These priors provide enough flexibility because as hyperprior the resulting distributions for the group specific parameters can differ more. 
+For hierarchical model, we need to define prior distributions for the hyperparametrs. Here we use same logic as above and choose prior distributions for all the hyperparameters that are required to be positive as $\Gamma(1,1)$ and hyperparameter of the mean of the normal distribution as $\mathcal{N}(0,20)$. These priors provide enough flexibility because as hyperprior the resulting distributions for the group specific parameters can differ more. 
 
 # N Fitting the models
 

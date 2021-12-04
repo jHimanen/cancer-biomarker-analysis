@@ -9,7 +9,7 @@ library(rstan)
 library(loo)
 library(ggplot2)
 
-data_path <- "Kurssit/Bayesian Data Analysis/Project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
+data_path <- "~/Code/courses/BDA/project/Debernardi et al 2020 data.csv" #'~/your/path/to/dataset' # Replace with working path
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -29,9 +29,12 @@ stan_data <- list(
 
 # Fit the Stan model
 pooled_fit <- stan(
-  file = 'Kurssit/Bayesian Data Analysis/Project/cancer-biomarker-analysis/models/pooled.stan', # [pathtorepo] Replace with working path
+  file = '~/Code/courses/BDA/project/cancer-biomarker-analysis/models/pooled.stan', # [pathtorepo] Replace with working path
   data = stan_data
 )
+
+results <- monitor(pooled_fit)
+selected_res <- results[c(1:20), c('mean', 'sd', 'n_eff', 'Rhat', 'Q5', 'Q50', 'Q95')]
 
 # Extract log-likelihoods for LOO evaluation
 log_liks <- list(
