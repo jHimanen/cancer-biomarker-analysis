@@ -342,7 +342,21 @@ knitr::include_graphics(c('./images/SA_hier_creatinine.png','./images/SA_hier_LY
 
 # 12 Conclusion 
 
-- Tänne voisi itse asiassa lisätä kuvaajat posterio distributioneista, koska missään ei oikestaan esitellä tän analyysin tuloksia. Niiden perusteella voisi sitten olla kiva arvioida mitä opittiin.
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of creatinine data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_dist_pooled_creatinine.png','./images/post_dist_hier_creatinine.png'))
+``` 
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of LYVE1 data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_dist_pooled_LYVE1.png','./images/post_dist_hier_LYVE1.png'))
+``` 
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of REG1B data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_dist_pooled_REG1B.png','./images/post_dist_hier_REG1B.png'))
+``` 
+
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of TFF1 data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
+knitr::include_graphics(c('./images/post_dist_pooled_TFF1.png','./images/post_dist_hier_TFF1.png'))
+``` 
 
 # 13 Self-reflection
 

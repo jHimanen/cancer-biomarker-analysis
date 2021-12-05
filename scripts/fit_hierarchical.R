@@ -81,7 +81,7 @@ draws <- as.data.frame(hier_fit)
 
 pCreatinine <- ggplot() + ggtitle('Posterior distribution of creatinine')
 x <- seq(0,5,0.05)
-for (i in seq(1,8000,200)) {
+for (i in seq(1,8000,100)) {
   df1 <- data.frame(x=x,y=dgamma(x,draws$`alpha[1]`[i],draws$`beta[1]`[i]))
   df2 <- data.frame(x=x,y=dgamma(x,draws$`alpha[2]`[i],draws$`beta[2]`[i]))
   df3 <- data.frame(x=x,y=dgamma(x,draws$`alpha[3]`[i],draws$`beta[3]`[i]))
@@ -94,7 +94,7 @@ pCreatinine
 
 pLYVE1 <- ggplot() + ggtitle('Posterior distribution of LYVE1')
 x <- seq(-15,15,0.1)
-for (i in seq(1,8000,200)) {
+for (i in seq(1,8000,100)) {
   df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,1]`[i],draws$`sigma[1,1]`[i]))
   df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,2]`[i],draws$`sigma[1,2]`[i]))
   df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,3]`[i],draws$`sigma[1,3]`[i]))
@@ -107,7 +107,7 @@ pLYVE1
 
 pREG1B <- ggplot() + ggtitle('Posterior distribution of REG1B')
 x <- seq(-10,15,0.1)
-for (i in seq(1,8000,200)) {
+for (i in seq(1,8000,100)) {
   df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,1]`[i],draws$`sigma[2,1]`[i]))
   df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,2]`[i],draws$`sigma[2,2]`[i]))
   df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,3]`[i],draws$`sigma[2,3]`[i]))
@@ -120,7 +120,7 @@ pREG1B
 
 pTFF1 <- ggplot() + ggtitle('Posterior distribution of TFF1')
 x <- seq(-3,15,0.1)
-for (i in seq(1,8000,200)) {
+for (i in seq(1,8000,100)) {
   df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,1]`[i],draws$`sigma[3,1]`[i]))
   df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,2]`[i],draws$`sigma[3,2]`[i]))
   df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,3]`[i],draws$`sigma[3,3]`[i]))

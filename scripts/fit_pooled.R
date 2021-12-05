@@ -79,7 +79,7 @@ draws <- as.data.frame(pooled_fit)
 
 pCreatinine <- ggplot() + ggtitle('Posterior distribution of creatinine')
 x <- seq(0,5,0.05)
-for (i in seq(1,4000,100)) {
+for (i in seq(1,4000,50)) {
   df <- data.frame(x=x,y=dgamma(x,draws$alpha[i],draws$beta[i]))
   pCreatinine <- pCreatinine + geom_line(data=df,aes(x,y),col='lightblue',alpha=0.4)
 }
@@ -87,7 +87,7 @@ pCreatinine
 
 pLYVE1 <- ggplot() + ggtitle('Posterior distribution of LYVE1')
 x <- seq(-10,10,0.1)
-for (i in seq(1,4000,100)) {
+for (i in seq(1,4000,50)) {
   df <- data.frame(x=x,y=dnorm(x,draws$`mu[1]`[i],draws$`sigma[1]`[i]))
   pLYVE1 <- pLYVE1 + geom_line(data=df,aes(x,y),col='lightblue',alpha=0.4)
 }
@@ -95,7 +95,7 @@ pLYVE1
 
 pREG1B <- ggplot() + ggtitle('Posterior distribution of REG1B')
 x <- seq(-5,12,0.1)
-for (i in seq(1,4000,100)) {
+for (i in seq(1,4000,50)) {
   df <- data.frame(x=x,y=dnorm(x,draws$`mu[2]`[i],draws$`sigma[2]`[i]))
   pREG1B <- pREG1B + geom_line(data=df,aes(x,y),col='lightblue',alpha=0.4)
 }
@@ -103,7 +103,7 @@ pREG1B
 
 pTFF1 <- ggplot() + ggtitle('Posterior distribution of TFF1')
 x <- seq(-7,15,0.1)
-for (i in seq(1,4000,100)) {
+for (i in seq(1,4000,50)) {
   df <- data.frame(x=x,y=dnorm(x,draws$`mu[3]`[i],draws$`sigma[3]`[i]))
   pTFF1 <- pTFF1 + geom_line(data=df,aes(x,y),col='lightblue',alpha=0.4)
 }
