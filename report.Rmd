@@ -77,15 +77,17 @@ To our knowledge, no other analyses have been performed on this dataset, so we c
 
 # 3 Models
 
-In this problem setting, we are fitting two types of models for the data: a pooled model and a hierarchical model. The goal is to find distributions for proteins for all three diagnosis groups. Therefore, the input data includes three matrices including the data as well as the number of observations. Note that the groups have different lengths. The data is denoted by $y_i$, $i=1,2,3$ corresponding to each group, where each column of presents four different proteins. Similarly the number of observations is denote as $n_i$. For the pooled model, we are using same parameters for all of the groups meaning that we are note considering the groups but the whole data set. For hierarchical model, the distributions have shared hyperparameters but for different groups, the distributions are fitted separately. 
+In this problem setting, we are fitting two types of models for the data: a pooled model and a hierarchical model. The goal is to find distributions for proteins for all three diagnosis groups. Therefore, the input data includes three matrices including the data and three scalars indicating the number of observations. Note that the groups have different lengths. The data is denoted by $y_i$, $i=1,2,3$ corresponding to each group, where each column presents four different proteins. Similarly the number of observations is denote as $n_i$. For the pooled model, we are using same parameters for all of the groups meaning that, in practice, we are not considering the groups but the whole data set. For hierarchical model, the distributions have shared hyperparameters but for different groups the distributions are fitted separately. 
 
-As mentioned above, we are considering four proteins or biomarkers: creatinine, LYVE1, REG1B and TFF1. In both pooled and hierarchical model, the distributions are fitted separately for each protein. After considering the distributions of the data, we decided to fit an exponential model with two parameters to creatinine and after logarithmic transformation we decided to fit a Gaussian model to the three remaining proteins. In practice, this means that we are fitting gamma distribution, as we are using mathematically more general formulation of exponential model, to creatinine data and normal distribution to log-transformed data of LYVE1, REG1B and TFF1. Note that we are using natural logarithm. After logarithmic transformation, the histograms of the three proteins were similar enough for us to use same prior distributions for their parameters. The decision on on the usage of the log-scale and normal distribution was made after it turned out that the exponential model could not be fitted to the data sensibly.
+As mentioned above, we are considering four proteins or biomarkers: creatinine, LYVE1, REG1B and TFF1. In both pooled and hierarchical model, the distributions are fitted separately for each protein. After considering the distributions of the data, we decided to use different types of models for creatinine and other proteins.
 
-TÄHÄN LISÄTÄÄN VIELÄ PAREMMAT PERUSTELUT EKSPONENTIALISEN JA NORMAALIMALLIN VALINNASTA, KUN TIETÄÄ MITÄ KAKKOS KOHTAAN ON KIRJOITETTU DATASTA JA MIHIN KUVIIN VAIKKA VIITATA.
+For creatinine data, an exponential model with two parameters is used. When considering the histogram in Part 2, we can see that exponential model is quite natural choice. In practice, this means that we are fitting a gamma distribution, as we are using mathematically more general formulation of exponential model.
+
+For other three biomarkers: LYVE1, REG1B and TFF1, we first tried to use an exponential model but it turned out that it could not be fitted to the data sensibly because the the differences between the largest and smallest values are large. Especially for REG1B and TFF1, the parameters obtain values that were practically zero. Therefore, we decided to make a logarithmic transformation to the data. The results can be seen in the histograms in Part 2. As some of the values are negative, we decided to simply use Gaussian model. Skewed distribution might be a better choice but the most obvious option such as log-normal distribution require values to be positive. To avoid over fitting and unnecessary transformation, we decided to fit a Gaussian model for the three remaining proteins. Note that we are using natural logarithm. In addition, after logarithmic transformation, the histograms of the three biomarkers were similar enough for us to use same prior distributions for their parameters making the implementation more straightforward,
 
 ## Pooled model
 
-Exponential model fitted to the creatinine data can be written as follows. Note that the choice of priors will be discussed in part 4. The first column of the data is denoted as $y_i^1$. Gamma distribution is denoted as $\Gamma$.
+Exponential model fitted to the creatinine data is be written mathematically below. Note that the choice of priors will be discussed in Part 4. The first column of the data is denoted as $y_i^1$ corresponding to creatinine data for diagnosis group i. Gamma distribution is denoted as $\Gamma$.
 
 $$
 \begin{aligned}
@@ -95,7 +97,7 @@ y_i^1 &\sim \Gamma(\alpha, \beta) \hspace{1cm} i=1,2,3 \\
 \end{aligned}
 $$
 
-The Gaussian model fitted to the data for three other proteins can be written as follows. Indexing $j=2,3,4$ refers to the proteins LYVE1, REB1B and TFF1 respectively.
+The Gaussian model fitted to the data for three other biomarkers can is written mathematically below. Indexing $j=2,3,4$ refers to the proteins LYVE1, REB1B and TFF1 respectively.
 
 $$
 \begin{aligned}
@@ -107,7 +109,7 @@ $$
 
 ## Hierarchical model
 
-Hierarchical model is constricted similarly but defined priors use hyperparametrs. In general, we will denote hyperparameters with lower index P. The corresponding hierarchical formulation of the exponential model to the creatinine data can be written as follows.
+Hierarchical model is constructed similarly but the prior distributions use hyperparameters and the actual parameters are specific for each diagnosis group. In general, we will denote hyperparameters with lower index P. The corresponding hierarchical formulation of the exponential model to the creatinine data can be written as follows.
 
 
 $$
@@ -119,6 +121,7 @@ y_i^1 &\sim \Gamma(\alpha_i, \beta_i) \hspace{1cm} i=1,2,3 \\
 \beta_{P_k} &\sim \Gamma(1,1)
 \end{aligned}
 $$
+
 The corresponding hierarchical formulation of the Gaussian model fitted to the data for three other proteins can be written as follows.
 
 $$
@@ -134,17 +137,17 @@ $$
 
 # 4 Priors
 
-In general, the models required two kind of prior distributions. For parameters of gamma distribution, it is essentials to keep them positive which narrows the possible choice of priors. As presented in the course books Bayesian Data Analysis, gamma distribution is a conjugate prior for exponential model. Therefore, gamma distribution was natural choice for prior distributions for both parameters $\alpha$ and $\beta$ for creatinine. The gamma distribution is easily quite narrow so we decided to consider informative priors but aim for enough flexibility in the model. 
+In general, the models required two kind of prior distributions. For parameters of gamma distribution, it is essentials to keep them positive which narrows the possible choice of priors. As presented in the course books Bayesian Data Analysis [3], a gamma distribution is a conjugate prior for exponential model. Therefore, gamma distribution is a natural choice for prior distributions for both parameters $\alpha$ and $\beta$ for creatinine. The gamma distribution is naturally quite narrow so we decided to consider informative priors but aim for enough flexibility in the model. 
 
-The first parameter of gamma distribution $\alpha$ determines the shape of the distribution and the second parameter $\beta$ the scale. After considering creatinine data, we decided to roughly aim for expected value of 1 for the shape and expected value of 0.5 for the scale parameter. The expected value of gamma distribution is calculated as $\frac{\alpha}{\beta}$ so possible prior distributions would be $\Gamma(1,1)$ and $\Gamma(0.5,1)$. For gamma distribution, small values for the parameters work well since the shape stays non specific. The distributions are plotted below.
+The first parameter of gamma distribution $\alpha$ determines the shape of the distribution and the second parameter $\beta$ the scale. After considering creatinine data, we decided to roughly aim for expected value of 1 for the shape and expected value of 0.5 for the scale parameter. The expected value of a gamma distribution is calculated as $\frac{\alpha}{\beta}$ so possible prior distributions would be $\Gamma(1,1)$ and $\Gamma(0.5,1)$. For gamma distribution, small values for the parameters work well since the shape stays non specific. The distributions are plotted below.
 
 ```{r, echo=FALSE, out.width="60%", out.height="30%", fig.cap="Piror distributions", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/gamma_priors.png'))
 ``` 
 
-For other three proteins, we are fitting Gaussian model. It is important to note that we are fitting similar model to each of the protein LYVE1, REG1B and TFF1 but they are not connected to each other. We need a prior distributions for the mean value and for the standard deviation. The prior of the mean is chosen so that it is sensible but not restricting. In part 2, we have seen that the values of all three proteins after logarithmic transformation, obtain both negative and positive values. This is why we will choose the mean of the prior of the parameter $\mu$ as 0. To be able to easily adjust to the data we will chose large value for the standard deviation as 20. Hence the prior distribution for the mean is $\mathcal{N}(0,20)$. In sensitivity analysis, we will notice that the choice of the standard deviation does not affect the result strongly as long as it is wide enough. The prior distribution for $\sigma$ is chosen as $\Gamma(1,1)$ so that it stays positive and gives wide enough range of values.
+For other three biomarkers, we are fitting Gaussian model. It is important to note that we are fitting similar model to each of the protein LYVE1, REG1B and TFF1 but they are not connected to each other. We need prior distributions for the mean value and for the standard deviation. The prior of the mean is chosen so that it is sensible but not restricting. In Part 2, we have seen that the values of all three proteins after logarithmic transformation, obtain both negative and positive values. This is why we will choose the mean of the prior of the parameter $\mu$ as 0. To be able to easily adjust to the data we will chose large value for the standard deviation as 20. Hence the prior distribution for the mean is $\mathcal{N}(0,20)$. In sensitivity analysis, we will notice that the choice of the standard deviation does not affect the result strongly as long as it is wide enough. The prior distribution for $\sigma$ is chosen as $\Gamma(1,1)$ so that it stays positive and gives wide enough range of values.
 
-For the hierarchical model, we need to define prior distributions for the hyperparameters. Here we use same logic as above and choose prior distributions for all the hyperparameters that are required to be positive as $\Gamma(1,1)$ and hyperparameter of the mean of the normal distribution as $\mathcal{N}(0,20)$. These priors provide enough flexibility because as hyperprior the resulting distributions for the group specific parameters can differ more. 
+For the hierarchical model, we need to define prior distributions for the hyperparameters. Here we use same logic as above and choose prior distributions for all the hyperparameters that are required to be positive as $\Gamma(1,1)$ and hyperparameter of the mean of the normal distribution as $\mathcal{N}(0,20)$. These priors provide enough flexibility to fit models to the different diagnosis groups. 
 
 # 5 Stan code
 
@@ -187,7 +190,7 @@ Judging by the effective sample sizes and $\hat{R}$ values, the hierarchical mod
 
 # 7 Posterior predictive checks
 
-Posterior predictive checks were completed visually in this project. The stan models include generation of predictive samples for each diagnosis group and protein. In general the posterior predictive check was done as follows. For both models, the same number of samples as in the original dataset was drawn four times. This samples were plotted as a histogram so that the distribution can be compared to the original histogram. Below you can find the figures. The original data is plotted as white histogram on the background and coloured histograms present the draws.
+Posterior predictive checks were completed visually in this project. The stan models include generation of predictive samples for each diagnosis group and protein. In general the posterior predictive check was done as follows. For both models, the same number of samples as in the original dataset was drawn four times. This samples were plotted as histograms so that the distribution can be compared to the original histogram. Below you can find the figures. The original data is plotted as white histogram on the background and colored histograms present the draws.
 
 ## Pooled model
 
@@ -197,13 +200,13 @@ For the pooled model, we are using same parameters for each diagnosis group. The
 knitr::include_graphics(c('./images/post_check_pooled_creatinine.png','./images/post_check_pooled_LYVE1.png', './images/post_check_pooled_REG1B.png', './images/post_check_pooled_TFF1.png'))
 ``` 
 
-We can see that for creatinine and REG1B replicated samples correspond to the original data quite well. For REG1B, the normal distribution cannot present the longer tail on the left that the actual data has. However, the overall fit is satisfying. LYVE1 and TFF1 cause more reason to worry since the original data, after log-transformation, has two spikes meaning the actual distribution would be multi-modal. The normal distribution does not replicate well compared to the data because it is rather a compromize between these two peaks. However, pooled model is already a combination of all of the diagnosis groups so it could be expected that the fits to the data are not as good.
+We can see that for creatinine and REG1B replicated samples correspond to the original data quite well. For REG1B, the normal distribution cannot present the longer tail on the left that the actual data has. However, the overall fit is satisfying. LYVE1 and TFF1 cause more reason to worry since the original data, after log-transformation, has two spikes meaning that the actual distribution would be bimodal. The normal distribution does not replicate well compared to the data because it is rather a compromise between these two peaks. However, pooled model is already a combination of all of the diagnosis groups so it could be expected that the fits to the data are not as good.
 
 ## Hierarchical model
 
-For hierarchical model we obtain overall of twelve figures that are presented below grouped by the diagnosis group. Similarly as in the pooled model replicated data sets for creatinine and REG1B correspond quite well to the original data for each diagnosis group. The same issue for REG1B can be seen here as the skewness of the data cannot be taken into account with normal distribution. This is a clear improvement point but especially for diagnosis group 3 the fit is actually quite good and covers all the extreme values.
+For hierarchical model, we obtain overall of twelve figures that are presented below grouped by the diagnosis. Similarly as in the pooled model, replicated datasets for creatinine and REG1B correspond quite well to the original data for each diagnosis group. The same issue for REG1B can be seen here as the skewness of the data cannot be taken into account with normal distribution. This is a clear improvement point but especially for diagnosis group 3 the fit is actually quite good and covers all the extreme values.
 
-For LYVE2 and TFF1 the same issue with two spikes in the data can still be seen, especially with diagnosis group 1 and 2. It is interesting to see that in diagnosis group 1 with healthy control group there is two clear peaks in the data. It would be a good issue to investigate more closely. On the other hand, the fit in diagnosis group 1 is maybe even better than in diagnosis group 2 since there the skewness of multi-model distribution makes the normal distribution very bad choice since it needs to be wide. For protein LYVE1 and diagnosis group 3, the fit is actually quite good even though there are some extreme values on the left that normal distribution cannot replicate. For TFF1, the issues are very similar but the other spike is not as large so the issues are not as strong. In general, the replicate data is better but there is still definitely room for improvement. It might be a good idea to fit multi-modal distribution insetad of normal distribution.
+For LYVE2 and TFF1 the same issue with two spikes in the data can be seen, especially with diagnosis group 1 and 2. It is interesting to see that in diagnosis group 1 with healthy control group, there is two clear peaks in the data. It would be a good issue to investigate more closely. On the other hand, the fit in diagnosis group 1 is maybe even better than in diagnosis group 2 since there the skewness of bimodel distribution makes the normal distribution very bad choice since it needs to be very wide. For protein LYVE1 and diagnosis group 3, the fit is actually quite good even though there are some extreme values on the left that normal distribution cannot replicate. For TFF1, the issues are very similar but the other spike is not as large so the issues are not as strong. In general, the replicate data is better but there is still definitely room for improvement. It might be a good idea to fit bimodal distribution instead of normal distribution.
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnosis 2 and the hierarchical model", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_check_hier_creatinine_1.png','./images/post_check_hier_LYVE1_1.png', './images/post_check_hier_REG1B_1.png', './images/post_check_hier_TFF1_1.png'))
@@ -339,6 +342,8 @@ knitr::include_graphics(c('./images/SA_hier_creatinine.png','./images/SA_hier_LY
 
 # 12 Conclusion 
 
+- Tänne voisi itse asiassa lisätä kuvaajat posterio distributioneista, koska missään ei oikestaan esitellä tän analyysin tuloksia. Niiden perusteella voisi sitten olla kiva arvioida mitä opittiin.
+
 # 13 Self-reflection
 
 
@@ -346,3 +351,4 @@ knitr::include_graphics(c('./images/SA_hier_creatinine.png','./images/SA_hier_LY
 
 -   [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
 -   [2] Debernardi S, O'Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case--control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
+- [3] Course book PITÄÄ LISÄTÄ
