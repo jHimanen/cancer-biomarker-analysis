@@ -151,6 +151,232 @@ For the hierarchical model, we need to define prior distributions for the hyperp
 
 # 5 Stan code
 
+## Pooled model
+
+``` {eval="FALSE"}
+// ------------------------------------------
+// This is a pooled Stan model for the
+// "Urinary biomarkers for pancreatic cancer"
+// data set.  
+// ------------------------------------------
+
+data {
+  // Lengths of the observation vectors
+  int<lower=0> N1;
+  int<lower=0> N2;
+  int<lower=0> N3;
+  // Observations of the 4 protein levels for each group
+  vector[4] y1[N1];
+  vector[4] y2[N2];
+  vector[4] y3[N3];
+}
+
+transformed data {
+  vector[3] log_y1[N1];
+  vector[3] log_y2[N2];
+  vector[3] log_y3[N3];
+  
+  for (j in 1:3){
+    log_y1[,j] = log(y1[,j+1]);
+    log_y2[,j] = log(y2[,j+1]);
+    log_y3[,j] = log(y3[,j+1]);
+  }
+}
+
+parameters {
+  real<lower=0> alpha;
+  real<lower=0> beta;
+  vector [3] mu;
+  vector<lower=0> [3] sigma;
+}
+
+model {
+  // Priors
+  alpha ~ gamma(1, 1);
+  beta ~ gamma(0.5, 1);  
+  for (j in 1:3) {
+    mu[j] ~ normal(0,20);
+    sigma[j] ~ gamma(1, 1);
+  }
+  // Likelihoods
+  y1[,1] ~ gamma(alpha, beta);
+  y2[,1] ~ gamma(alpha, beta);
+  y3[,1] ~ gamma(alpha, beta);
+  for (j in 1:3) {
+    log_y1[,j] ~ normal(mu[j], sigma[j]);
+    log_y2[,j] ~ normal(mu[j], sigma[j]);
+    log_y3[,j] ~ normal(mu[j], sigma[j]);
+  }
+}
+
+generated quantities {
+  // Posterior predictive distributions
+  vector[4] ypred_1;
+  vector[4] ypred_2;
+  vector[4] ypred_3;
+  // Log-likelihoods of the posterior draws
+  vector[4] log_lik_1[N1];
+  vector[4] log_lik_2[N2];
+  vector[4] log_lik_3[N3];
+  
+  // Group 1
+  ypred_1[1] = gamma_rng(alpha, beta);
+  for (n in 1:N1)
+    log_lik_1[n,1] = gamma_lpdf(y1[n,1] | alpha, beta);
+    
+  for (j in 1:3) {
+    ypred_1[j+1] = normal_rng(mu[j], sigma[j]);
+    for (n in 1:N1) {
+      log_lik_1[n,j+1] = normal_lpdf(log_y1[n,j] | mu[j], sigma[j]);
+    }
+  }
+  //Group 2
+  ypred_2[1] = gamma_rng(alpha, beta);
+  for (n in 1:N2)
+    log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha, beta);
+    
+  for (j in 1:3) {
+    ypred_2[j+1] = normal_rng(mu[j], sigma[j]);
+    for (n in 1:N2) {
+      log_lik_2[n,j+1] = normal_lpdf(log_y2[n,j] | mu[j], sigma[j]);
+    }
+  }
+  //Group 3
+  ypred_3[1] = gamma_rng(alpha, beta);
+  for (n in 1:N3)
+      log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha, beta);
+      
+  for (j in 1:3) {
+    ypred_3[j+1] = normal_rng(mu[j], sigma[j]);
+    for (n in 1:N3) {
+      log_lik_3[n,j+1] = normal_lpdf(log_y3[n,j] | mu[j], sigma[j]);
+    }
+  }
+}
+
+```
+
+## Hierarchical model
+
+``` {eval="FALSE"}
+// ------------------------------------------
+// This is a hierarchical Stan model for the
+// "Urinary biomarkers for pancreatic cancer"
+// dataset.  
+// ------------------------------------------
+
+data {
+  // Lengths of the observation vectors
+  int<lower=0> N1;
+  int<lower=0> N2;
+  int<lower=0> N3;
+  // Observations for each group
+  vector[4] y1[N1];
+  vector[4] y2[N2];
+  vector[4] y3[N3];
+}
+
+transformed data {
+  vector[3] log_y1[N1];
+  vector[3] log_y2[N2];
+  vector[3] log_y3[N3];
+  
+  for (j in 1:3){
+    log_y1[,j] = log(y1[,j+1]);
+    log_y2[,j] = log(y2[,j+1]);
+    log_y3[,j] = log(y3[,j+1]);
+  }
+}
+
+parameters {
+  // Hyperparamters
+  real<lower=0> alphaP[2];
+  real<lower=0> betaP[2];
+  vector[3] muP[2];
+  vector<lower=0>[3] sigmaP[2];
+  // Parameters
+  real<lower=0> alpha[3];
+  real<lower=0> beta[3];
+  vector [3] mu[3];
+  vector<lower=0> [3] sigma[3];
+}
+
+model {
+  // k-> number of parameters in priors
+  // j-> number of proteins
+  // Hyperpriors
+  for (k in 1:2){
+    alphaP[k] ~ gamma(1,1);
+    betaP[k] ~ gamma(1,1);
+    sigmaP[k,] ~ gamma(1,1);
+  }
+  muP[1,] ~ normal(0,20);
+  muP[2,] ~ gamma(1,1);
+  // Priors
+  alpha ~ gamma(alphaP[1], betaP[1]);
+  beta ~ gamma(alphaP[2], betaP[2]);
+  for (j in 1:3){
+    mu[,j] ~ normal(muP[1,j], sigmaP[1,j]);
+    sigma[,j] ~ gamma(muP[2,j], sigmaP[2,j]);
+  }
+  // Likelihood
+  y1[,1] ~ gamma(alpha[1], beta[1]);
+  y2[,1] ~ gamma(alpha[2], beta[2]);
+  y3[,1] ~ gamma(alpha[3], beta[3]);
+  for (j in 1:3){
+    log_y1[,j] ~ normal(mu[1,j], sigma[1,j]);
+    log_y2[,j] ~ normal(mu[2,j], sigma[2,j]);
+    log_y3[,j] ~ normal(mu[3,j], sigma[3,j]);
+  }
+}
+
+generated quantities {
+  // Posterior predictive distributions
+  vector[4] ypred_1;
+  vector[4] ypred_2;
+  vector[4] ypred_3;
+  // Log-likelihoods of the posterior draws
+  vector[4] log_lik_1[N1];
+  vector[4] log_lik_2[N2];
+  vector[4] log_lik_3[N3];
+  
+  // Group 1
+  ypred_1[1] = gamma_rng(alpha[1], beta[1]);
+  for (n in 1:N1)
+    log_lik_1[n,1] = gamma_lpdf(y1[n,1] | alpha[1], beta[1]);
+    
+  for (j in 1:3) {
+    ypred_1[j+1] = normal_rng(mu[1,j], sigma[1,j]);
+    for (n in 1:N1) {
+      log_lik_1[n,j+1] = normal_lpdf(log_y1[n,j] | mu[1,j], sigma[1,j]);
+    }
+  }
+  //Group 2
+  ypred_2[1] = gamma_rng(alpha[2], beta[2]);
+  for (n in 1:N2)
+    log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha[2], beta[2]);
+    
+  for (j in 1:3) {
+    ypred_2[j+1] = normal_rng(mu[2,j], sigma[2,j]);
+    for (n in 1:N2) {
+      log_lik_2[n,j+1] = normal_lpdf(log_y2[n,j] | mu[2,j], sigma[2,j]);
+    }
+  }
+  //Group 3
+  ypred_3[1] = gamma_rng(alpha[3], beta[3]);
+  for (n in 1:N3)
+      log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha[3], beta[3]);
+      
+  for (j in 1:3) {
+    ypred_3[j+1] = normal_rng(mu[3,j], sigma[3,j]);
+    for (n in 1:N3) {
+      log_lik_3[n,j+1] = normal_lpdf(log_y3[n,j] | mu[3,j], sigma[3,j]);
+    }
+  }
+}
+
+```
+
 # 6 Fitting and convergence diagnostics
 
 Both of the models were first run with the default options of the `rstan::stan()` function, that is
@@ -334,17 +560,27 @@ knitr::include_graphics(c('./images/SA_hier_creatinine.png','./images/SA_hier_LY
 
 # 11 Discussion
 
-- The same issue for REG1B can be seen here as the skewness of the data cannot be taken into account with normal distribution -> skewed distribution on the negative values.
+As discussed in Part 7 when making posterior predictive checks, there is multiple possibilities to improve the model. For creatinine, the model works quite well but for the three other biomarkers the Gaussian model could be changed to something more flexible. For example, for REG1B normal distribution fits quite well but skewed distribution could take into account extreme values better. Data could be transformed to positive scale so that, for example, log-normal distribution could be used.    
 
-- It is interesting to see that in diagnosis group 1 with healthy control group there is two clear peaks in the data. It would be a good issue to investigate more closely.
+Secondly, we can see that log-transformed LYVE1 and TFF1 data has two peaks which would imply that the data is bimodally distributed. This is an interesting question since two peaks can be seen within healthy individuals. The reasons for this could be investigated further so that we can conclude whether the explanation is lack of data or that there actually can be seen two peaks. 
 
-- LYVE1 and TFF1 -> It might be a good idea to fit multi-modal distribution instead of normal distribution. But risk for over-fitting, need to find predictors (creatinine) and reasons for multi-modality.
+Depending on the conclusion, one might consider fitting bimodal distribution or mixture of several distributions. On the other hand, if there is attributes that predict the values of LYVE1 and TFF1, these could be used to create a model that corresponds to the data better. For example, after investigating the data there seems to be dependence between creatinine levels and LYVE1 and TFF1. Trying to fit bimodal distribution to the current data might work but it could result in overfitting since the number of observations might not be large enough.
 
-# 12 Conclusion 
+# 12 Conclusion
+
+To be able to evaluate the results of the data analysis, the resulting posterior distribution for each biomarker has been plotted below. Results from the pooled and the hierarchical model are presented side by side. We can see that creatinine has only small differences between different diagnosis groups. Therefore it can not be used as an indicator for PDAC. This has been the case in the original study [1] and in this project this can be used as a reference.
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of creatinine data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_dist_pooled_creatinine.png','./images/post_dist_hier_creatinine.png'))
 ``` 
+
+For other three biomarkers, the results between pooled and hierarchical model differ significantly and we can conclude that there is differences between the diagnosis groups, at least based on this dataset. Note that green color corresponds to the healthy control group, blue color to the group with some pancreatic disease and red color to the patient with PDAC diagnosis.
+
+When examining the figures fir LYVE1, we can see that diagnosis groups 1 and 3 have very wide distribution but they are somewhat separated. Diagnosis group 2 has quite narrow distribution but it overlaps entirely with group 3. This implies that LYVE1 can be used as an indicator for pancreatic disease but conclusions about PDAC are hard to make.
+
+For REG1B, distributions for each diagnosis group are very similar by shape and for diagnosis group 1 the distribution is very wide. Once again, the distributions of groups 2 and 3 overlap but now largest values of REG1B indicate PDAC. REg1B then could be used as an indicator or predictor for PDAC but differentiating from other pancreatic disease might be difficult.
+
+For TFF1, the distribution for control group is the narrowest so this biomarker is best for recognizing healthy people. The overlap between groups 2 and 3 is small so large values of TFF1 imply some kind of pancreatic disease. The same phenomenon can be seen with TFF1 that it is difficult to separate PDAC from other disease and the distribution of group3 is very wide.
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of LYVE1 data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_dist_pooled_LYVE1.png','./images/post_dist_hier_LYVE1.png'))
@@ -365,4 +601,4 @@ knitr::include_graphics(c('./images/post_dist_pooled_TFF1.png','./images/post_di
 
 -   [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
 -   [2] Debernardi S, O'Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case--control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
-- [3] Course book PITÄÄ LISÄTÄ
+- [3] Bayesian Data Analysis, Third edition; Gelman, Carlin, Stern, Dunson, Vehtari and Rubin; 2016
