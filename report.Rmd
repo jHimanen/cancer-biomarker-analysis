@@ -159,7 +159,7 @@ For the hierarchical model, we need to define prior distributions for the hyperp
 
 ## Pooled model
 
-``` {eval="FALSE"}
+```{eval="FALSE"}
 // ------------------------------------------
 // This is a pooled Stan model for the
 // "Urinary biomarkers for pancreatic cancer"
@@ -264,7 +264,7 @@ generated quantities {
 
 ## Hierarchical model
 
-``` {eval="FALSE"}
+```{eval="FALSE"}
 // ------------------------------------------
 // This is a hierarchical Stan model for the
 // "Urinary biomarkers for pancreatic cancer"
@@ -559,7 +559,7 @@ On the other hand, it is noteworthy to say that even though the results end up t
 knitr::include_graphics(c('./images/SA_hier_creatinine.png','./images/SA_hier_LYVE1.png', './images/SA_hier_REG1B.png', './images/SA_hier_TFF1.png'))
 ``` 
 
-# 11 Discussion
+# 11 Issues and potential improvements
 
 As discussed in Part 7 when making posterior predictive checks, there is multiple possibilities to improve the model. For creatinine, the model works quite well but for the three other biomarkers the Gaussian model could be changed to something more flexible. For example, for REG1B normal distribution fits quite well but skewed distribution could take into account extreme values better. Data could be transformed to positive scale so that, for example, log-normal distribution could be used.    
 
@@ -567,9 +567,11 @@ Secondly, we can see that log-transformed LYVE1 and TFF1 data has two peaks whic
 
 Depending on the conclusion, one might consider fitting bimodal distribution or mixture of several distributions. On the other hand, if there is attributes that predict the values of LYVE1 and TFF1, these could be used to create a model that corresponds to the data better. For example, after investigating the data there seems to be dependence between creatinine levels and LYVE1 and TFF1. Trying to fit bimodal distribution to the current data might work but it could result in overfitting since the number of observations might not be large enough.
 
+As we concluded in chapter 8, model comparison suggests quite strongly to prefer the hierarchical model over the pooled one, even though there are some uncertainties (see detailed discussion in chapter 8). As it seems likely that the cause of said uncertainties lies with some divergences during MCMC, another topic for improvement would be to fix those divergences. This could be achieved by e.g. reparameterization of the hierarchical model using Neal's funnel, as suggested in the Stan documentation.[4]  
+
 # 12 Conclusion
 
-To be able to evaluate the results of the data analysis, the resulting posterior distribution for each biomarker has been plotted below. Results from the pooled and the hierarchical model are presented side by side. We can see that creatinine has only small differences between different diagnosis groups. Therefore it can not be used as an indicator for PDAC. This has been the case in the original study [1] and in this project this can be used as a reference.
+To be able to evaluate the results of the data analysis, the resulting posterior distribution for each biomarker has been plotted below. Results from the pooled and the hierarchical model are presented side by side, even though our study suggests that the latter outperforms the former. We can see that creatinine has only small differences between different diagnosis groups. Therefore it can not be used as an indicator for PDAC. This has been the case in the original study [1] and in this project this can be used as a reference.
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of creatinine data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_dist_pooled_creatinine.png','./images/post_dist_hier_creatinine.png'))
@@ -595,6 +597,8 @@ knitr::include_graphics(c('./images/post_dist_pooled_REG1B.png','./images/post_d
 knitr::include_graphics(c('./images/post_dist_pooled_TFF1.png','./images/post_dist_hier_TFF1.png'))
 ``` 
 
+Finally, it has to be stated, that even though our hierarchical model seems to perform quite well and yields comprehensive results, it still requires improvement (as suggested in chapter 11) before we recommend it to be applied in context. That being said, we conclude this study to be a suitable basis for further research and development to be conducted in the area of PDAC prediction using Bayesian inference.  
+
 # 13 Self-reflection
 
 - Log-muutoksen tarpeellisuus ja käytännön toteutus
@@ -604,6 +608,7 @@ knitr::include_graphics(c('./images/post_dist_pooled_TFF1.png','./images/post_di
 
 # References
 
--   [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
--   [2] Debernardi S, O'Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case--control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
+- [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
+- [2] Debernardi S, O'Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case--control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
 - [3] Bayesian Data Analysis, Third edition; Gelman, Carlin, Stern, Dunson, Vehtari and Rubin; 2016
+- [4] https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html
