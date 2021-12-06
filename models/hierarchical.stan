@@ -9,7 +9,7 @@ data {
   int<lower=0> N1;
   int<lower=0> N2;
   int<lower=0> N3;
-  // Observations for each group
+  // Observations of the 4 protein levels for each group
   vector[4] y1[N1];
   vector[4] y2[N2];
   vector[4] y3[N3];

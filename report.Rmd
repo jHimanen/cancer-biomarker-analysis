@@ -1,9 +1,10 @@
 ---
 title: 'A Bayesian approach to analyzing urinary biomarkers for pancreatic cancer'
 author: "Noora Torpo, Joel Himanen"
-date: "11/25/2021"
+date: "6.12.2021"
 output:
   rmarkdown::pdf_document:
+    toc: true
     fig_caption: yes        
     includes:  
       in_header: preamble-latex.tex
@@ -15,21 +16,6 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-1)  Introduction describing the motivation, the problem and the main modeling idea. Showing some illustrative figure is recommended. (J)
-2)  Description of the data and the analysis problem. Provide information where the data was obtained, and if it has been previously used in some online case study and how your analysis differs from the existing analyses. (J)
-3)  Description of at least two models, for example: non hierarchical and hierarchical, linear and non linear, variable selection with many models. Pooled (J); Hierarchical (N)
-4)  Informative or weakly informative priors, and justification of their choices. (N)
-5)  Stan, rstanarm or brms code.
-6)  How the Stan model was run, that is, what options were used. This is also more clear as combination of textual explanation and the actual code line. (J)
-7)  Convergence diagnostics (Rˆ, ESS, divergences) and what was done if the convergence was not good with the first try. (J)
-8)  Posterior predictive checks and what was done to improve the model. (N)
-9)  Model comparison (e.g. with LOO-CV). (J)
-10) Predictive performance assessment if applicable (e.g. classification accuracy) and evaluation of practical usefulness of the accuracy. If not applicable, then explanation why in this case the predictive performance is not applicable. (N)
-11) Sensitivity analysis with respect to prior choices (i.e. checking whether the result changes a lot if prior is changed) (N)
-12) Discussion of issues and potential improvements.
-13) Conclusion what was learned from the data analysis.
-14) Self-reflection of what the group learned while making the project.
 
 # 1 Introduction
 
@@ -83,15 +69,15 @@ For the pooled model, we are using same parameters for all of the groups meaning
 
 As mentioned above, we are considering four proteins or biomarkers: creatinine, LYVE1, REG1B and TFF1. In both pooled and hierarchical model, the distributions are fitted separately for each protein. After considering the distributions of the data, we decided to use different types of models for creatinine and other proteins.
 
-For creatinine data, an exponential model with two parameters is used. When considering the histogram in Part 2, we can see that exponential model is quite natural choice. In practice, this means that we are fitting a gamma distribution, as we are using mathematically more general formulation of exponential model as described in the Bayesian Data Analysis book [3].
+For creatinine data, an exponential model with two parameters is used. When considering the histogram in chapter 2, we can see that exponential model is quite natural choice. In practice, this means that we are fitting a gamma distribution, as we are using mathematically more general formulation of exponential model as described in the Bayesian Data Analysis book [3].
 
-For other three biomarkers: LYVE1, REG1B and TFF1, we first tried to use an exponential model but it turned out that it could not be fitted to the data sensibly. The differences between the largest and the smallest values are drastic and, especially, for REG1B and TFF1, the parameters obtain values that were practically zero. Therefore, we decided to make a logarithmic transformation to the data. The results can be seen in the histograms in Part 2. Note that we are using natural logarithm.
+For other three biomarkers: LYVE1, REG1B and TFF1, we first tried to use an exponential model but it turned out that it could not be fitted to the data sensibly. The differences between the largest and the smallest values are drastic and, especially, for REG1B and TFF1, the parameters obtain values that were practically zero. Therefore, we decided to make a logarithmic transformation to the data. The results can be seen in the histograms in chapter 2. Note that we are using natural logarithm.
 
 As some of the values are negative, we decided to simply use Gaussian model. Skewed distribution might be a better choice but the most obvious option such as log-normal distribution requires values to be positive. To avoid over fitting and unnecessary transformation, we decided to fit a Gaussian model for the three remaining proteins. In addition, after logarithmic transformation, the histograms of the three biomarkers were similar enough for us to use same prior distributions for their parameters making the implementation more straightforward.
 
 ## Pooled model
 
-Exponential model fitted to the creatinine data is be written mathematically below. Note that the choice of priors will be discussed in Part 4. The first column of the data is denoted as $y_i^1$ corresponding to creatinine data for diagnosis group $i$. Gamma distribution is denoted as $\Gamma$.
+Exponential model fitted to the creatinine data is be written mathematically below. Note that the choice of priors will be discussed in chapter 4. The first column of the data is denoted as $y_i^1$ corresponding to creatinine data for diagnosis group $i$. Gamma distribution is denoted as $\Gamma$.
 
 $$
 \begin{aligned}
@@ -151,21 +137,17 @@ knitr::include_graphics(c('./images/gamma_priors.png'))
 
 For other three biomarkers, we are fitting a Gaussian model. It is important to note that we are fitting similar model to each of the protein LYVE1, REG1B and TFF1 but they are not connected to each other. 
 
-We need prior distributions for the mean value and for the standard deviation. The prior of the mean is chosen so that it is sensible but not restricting. In Part 2, we have seen that the values of all three proteins after logarithmic transformation, obtain both negative and positive values. This is why we will choose the mean of the prior of the parameter $\mu$ as 0. To be able to easily adjust to the data we will chose large value for the standard deviation as 20. Hence the prior distribution for the mean is $\mathcal{N}(0,20)$. In sensitivity analysis, we will notice that the choice of the standard deviation does not affect the result strongly as long as it is wide enough. The prior distribution for $\sigma$ is chosen as $\Gamma(1,1)$ so that it stays positive and gives wide enough range of values.
+We need prior distributions for the mean value and for the standard deviation. The prior of the mean is chosen so that it is sensible but not restricting. In chapter 2, we have seen that the values of all three proteins after logarithmic transformation, obtain both negative and positive values. This is why we will choose the mean of the prior of the parameter $\mu$ as 0. To be able to easily adjust to the data we will chose large value for the standard deviation as 20. Hence the prior distribution for the mean is $\mathcal{N}(0,20)$. In sensitivity analysis, we will notice that the choice of the standard deviation does not affect the result strongly as long as it is wide enough. The prior distribution for $\sigma$ is chosen as $\Gamma(1,1)$ so that it stays positive and gives wide enough range of values.
 
 For the hierarchical model, we need to define prior distributions for the hyperparameters. Here we use same logic as above and choose prior distributions for all the hyperparameters that are required to be positive as $\Gamma(1,1)$ and hyperparameter of the mean of the normal distribution as $\mathcal{N}(0,20)$. These priors provide enough flexibility to fit models to the different diagnosis groups. 
 
-# 5 Stan code
+# 5 Stan models
+
+This chapter is reserved only for including comprehensive versions of the Stan models used in this study. They are otherwise complete, but computations for two of the three test subject groups have been omitted from the `generated quantities` blocks for the sake of saving space, since the logic is equivalent for each group. To see the complete Stan code, see appendix A.
 
 ## Pooled model
 
 ```{eval="FALSE"}
-// ------------------------------------------
-// This is a pooled Stan model for the
-// "Urinary biomarkers for pancreatic cancer"
-// data set.  
-// ------------------------------------------
-
 data {
   // Lengths of the observation vectors
   int<lower=0> N1;
@@ -236,28 +218,8 @@ generated quantities {
       log_lik_1[n,j+1] = normal_lpdf(log_y1[n,j] | mu[j], sigma[j]);
     }
   }
-  //Group 2
-  ypred_2[1] = gamma_rng(alpha, beta);
-  for (n in 1:N2)
-    log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha, beta);
-    
-  for (j in 1:3) {
-    ypred_2[j+1] = normal_rng(mu[j], sigma[j]);
-    for (n in 1:N2) {
-      log_lik_2[n,j+1] = normal_lpdf(log_y2[n,j] | mu[j], sigma[j]);
-    }
-  }
-  //Group 3
-  ypred_3[1] = gamma_rng(alpha, beta);
-  for (n in 1:N3)
-      log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha, beta);
-      
-  for (j in 1:3) {
-    ypred_3[j+1] = normal_rng(mu[j], sigma[j]);
-    for (n in 1:N3) {
-      log_lik_3[n,j+1] = normal_lpdf(log_y3[n,j] | mu[j], sigma[j]);
-    }
-  }
+  
+  //...
 }
 
 ```
@@ -265,18 +227,12 @@ generated quantities {
 ## Hierarchical model
 
 ```{eval="FALSE"}
-// ------------------------------------------
-// This is a hierarchical Stan model for the
-// "Urinary biomarkers for pancreatic cancer"
-// dataset.  
-// ------------------------------------------
-
 data {
   // Lengths of the observation vectors
   int<lower=0> N1;
   int<lower=0> N2;
   int<lower=0> N3;
-  // Observations for each group
+  // Observations of the 4 protein levels for each group
   vector[4] y1[N1];
   vector[4] y2[N2];
   vector[4] y3[N3];
@@ -357,28 +313,8 @@ generated quantities {
       log_lik_1[n,j+1] = normal_lpdf(log_y1[n,j] | mu[1,j], sigma[1,j]);
     }
   }
-  //Group 2
-  ypred_2[1] = gamma_rng(alpha[2], beta[2]);
-  for (n in 1:N2)
-    log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha[2], beta[2]);
-    
-  for (j in 1:3) {
-    ypred_2[j+1] = normal_rng(mu[2,j], sigma[2,j]);
-    for (n in 1:N2) {
-      log_lik_2[n,j+1] = normal_lpdf(log_y2[n,j] | mu[2,j], sigma[2,j]);
-    }
-  }
-  //Group 3
-  ypred_3[1] = gamma_rng(alpha[3], beta[3]);
-  for (n in 1:N3)
-      log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha[3], beta[3]);
-      
-  for (j in 1:3) {
-    ypred_3[j+1] = normal_rng(mu[3,j], sigma[3,j]);
-    for (n in 1:N3) {
-      log_lik_3[n,j+1] = normal_lpdf(log_y3[n,j] | mu[3,j], sigma[3,j]);
-    }
-  }
+  
+  //...
 }
 
 ```
@@ -400,7 +336,7 @@ print(pooled_res[c(1:8),c(1:5)])
 
 As we can see from the output, the pooled model seems to converge excellently with the default options. There are zero divergences, all $\hat{R}$ values differ from 1 by no more than roughly $10^{-3}$, and the effective sample sizes are above 3000. Hence, there was no need to tweak the options in this case. 
 
-The fitting of the hierarchical model with default options raises a warning of a bit over 200 divergent post-warmup transitions Our first attempt to get that number down was to double the chain length, which seemed to have at least some positive effect. Then we lowered the sampling step size by setting the `adapt_delta` parameter to 0.99. This had a very good effect, and we were able to get the number of divergences to under 20. At this point, we decided to accept the result. Below is an example code block, showing how the hierarchical model was run.
+The fitting of the hierarchical model with default options raises a warning of a bit over 200 divergent post-warmup transitions Our first attempt to get that number down was to double the chain length, which seemed to have at least some positive effect. Then we lowered the sampling step size by setting the `adapt_delta` parameter to 0.99. This had a very good effect, and we were able to get the number of divergences to under 20. At this point, we decided to accept the result. Below is an example code block, showing how the hierarchical model was run. For the full script, see appendix B.
 
 ```{r, eval=FALSE}
 hier_fit <- stan(
@@ -438,7 +374,7 @@ For hierarchical model, we obtain overall of twelve figures that are presented b
 
 For LYVE2 and TFF1 the same issue with two peaks in the data can be seen, especially with diagnosis group 1 and 2. It is interesting to see that in diagnosis group 1 with healthy people, there is two clear peaks in the data. For diagnosis group 2, the skewness of bimodel distribution makes the normal distribution very bad choice because the fitted distribution needs to be very wide. For protein LYVE1 and diagnosis group 3, the fit is actually quite good even though there are some extreme values on the left that normal distribution cannot replicate. 
 
-For TFF1, the issues are very similar but the other peak is not as large so the issues are not as strong. In general, the replicate data is better but there is still definitely room for improvement. It might be a good idea to fit bimodal distribution instead of normal distribution and this will be discussed further on Part 11.
+For TFF1, the issues are very similar but the other peak is not as large so the issues are not as strong. In general, the replicate data is better but there is still definitely room for improvement. It might be a good idea to fit bimodal distribution instead of normal distribution and this will be discussed further in chapter 11.
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior predictive checks for diagnosis 2 and the hierarchical model", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_check_hier_creatinine_1.png','./images/post_check_hier_LYVE1_1.png', './images/post_check_hier_REG1B_1.png', './images/post_check_hier_TFF1_1.png'))
@@ -561,7 +497,7 @@ knitr::include_graphics(c('./images/SA_hier_creatinine.png','./images/SA_hier_LY
 
 # 11 Issues and potential improvements
 
-As discussed in Part 7 when making posterior predictive checks, there is multiple possibilities to improve the model. For creatinine, the model works quite well but for the three other biomarkers the Gaussian model could be changed to something more flexible. For example, for REG1B normal distribution fits quite well but skewed distribution could take into account extreme values better. Data could be transformed to positive scale so that, for example, log-normal distribution could be used.    
+As discussed in chapter 7, when making posterior predictive checks, there is multiple possibilities to improve the model. For creatinine, the model works quite well but for the three other biomarkers the Gaussian model could be changed to something more flexible. For example, for REG1B normal distribution fits quite well but skewed distribution could take into account extreme values better. Data could be transformed to positive scale so that, for example, log-normal distribution could be used.    
 
 Secondly, we can see that log-transformed LYVE1 and TFF1 data has two peaks which would imply that the data is bimodally distributed. This is an interesting question since two peaks can be seen within healthy individuals. The reasons for this could be investigated further so that we can conclude whether the explanation is lack of data or that there actually can be observed two kind of individuals. 
 
@@ -571,7 +507,7 @@ As we concluded in chapter 8, model comparison suggests quite strongly to prefer
 
 # 12 Conclusion
 
-To be able to evaluate the results of the data analysis, the resulting posterior distribution for each biomarker has been plotted below. Results from the pooled and the hierarchical model are presented side by side, even though our study suggests that the latter outperforms the former. We can see that creatinine has only small differences between different diagnosis groups. Therefore it can not be used as an indicator for PDAC. This has been the case in the original study [1] and in this project this can be used as a reference.
+To be able to evaluate the results of the data analysis, the resulting posterior distribution for each biomarker has been plotted below. Results from the pooled and the hierarchical model are presented side by side, even though our study suggests that the latter outperforms the former. We can see that creatinine has only small differences between different diagnosis groups. Therefore it can not be used as an indicator for PDAC. This has been the case in the original study [2] and in this project this can be used as a reference.
 
 ```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of creatinine data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_dist_pooled_creatinine.png','./images/post_dist_hier_creatinine.png'))
@@ -585,30 +521,486 @@ For REG1B, distributions for each diagnosis group are very similar by shape and 
 
 For TFF1, the distribution for control group is the narrowest so this biomarker is best for recognizing healthy people. The overlap between groups 2 and 3 is small so large values of TFF1 imply some kind of pancreatic disease. The same phenomenon can be seen with TFF1 that it is difficult to separate PDAC from other disease and the distribution of group3 is very wide.
 
-```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of LYVE1 data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of LYVE1 data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and red diagnosis 3.", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_dist_pooled_LYVE1.png','./images/post_dist_hier_LYVE1.png'))
 ``` 
 
-```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of REG1B data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of REG1B data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and red diagnosis 3.", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_dist_pooled_REG1B.png','./images/post_dist_hier_REG1B.png'))
 ``` 
 
-```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of TFF1 data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and read diagnosis 3.", fig.show='hold', fig.align='center'}
+```{r, echo=FALSE, out.width="40%", out.height="20%", fig.cap="Posterior distribution of TFF1 data. The results from the pooled model on the left and from the hierarchical model on the right. Green presents diagnosis 1, blue diagnosis 2 and red diagnosis 3.", fig.show='hold', fig.align='center'}
 knitr::include_graphics(c('./images/post_dist_pooled_TFF1.png','./images/post_dist_hier_TFF1.png'))
 ``` 
 
 Finally, it has to be stated, that even though our hierarchical model seems to perform quite well and yields comprehensive results, it still requires improvement (as suggested in chapter 11) before we recommend it to be applied in context. That being said, we conclude this study to be a suitable basis for further research and development to be conducted in the area of PDAC prediction using Bayesian inference.  
 
-# 13 Self-reflection
+# 13 Reflection
 
-- Log-muutoksen tarpeellisuus ja käytännön toteutus
-- Parempi käsitys mallien valinnasta (pooled/hierarchical, exponential/bayesian) -> Kotitehtävissä aina annettu valmiiksi mitä käyttää, mutta nyt piti itse pohtia.
-- Convergence ja miten parantaa
-- Posterior predictive check käytännössä, ei tehty vielä missään tehtävässä
+Conducting this kind of project work has been an efficient way of tying all the knowledge and methods we have learned during this course into a comprehensive package. It finally clarified the big picture of Bayesian data analysis and its workflow, from choosing the right distribution shapes and priors all the way to model evaluation and comparison. It also gave us a deeper understanding of several sub-topics, which the weekly assignments of the course touched on only superficially. Below are some of them:
 
-# References
+- The need for transforming the data: when to apply e.g. log transformations and how to do it in practice
+- Choosing models and distributions (in the weekly assignments, these were always given)
+- Convergence diagnostics, and what tools are available if everything does not converge the first time
+- Posterior predictive checking (this study was a first deep dive into the topic for us)
+
+All in all, we are very satisfied with our work. It has been an interesting, challenging, and rewarding journey, and we feel that the meaningfulness of our topic also gave us more than enough motivation to see it through properly.
+
+# 14 References
 
 - [1] Sarantis P, Koustas E, Papadimitropoulou A, Papavassiliou AG, Karamouzis MV. (2020) *Pancreatic ductal adenocarcinoma: Treatment hurdles, tumor microenvironment and immunotherapy.* World J Gastrointest Oncol. 2020;12(2):173-181. https://doi.org/10.4251/wjgo.v12.i2.173
 - [2] Debernardi S, O'Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case--control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
 - [3] Bayesian Data Analysis, Third edition; Gelman, Carlin, Stern, Dunson, Vehtari and Rubin; 2016
 - [4] https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html
+
+# 15 Appendices
+
+Included is only the code that is referred to in this report. For the complete project repository, see https://github.com/jHimanen/cancer-biomarker-analysis.
+
+## Appendix A: complete Stan models
+
+### Pooled
+
+```{eval=FALSE}
+data {
+  // Lengths of the observation vectors
+  int<lower=0> N1;
+  int<lower=0> N2;
+  int<lower=0> N3;
+  // Observations of the 4 protein levels for each group
+  vector[4] y1[N1];
+  vector[4] y2[N2];
+  vector[4] y3[N3];
+}
+
+transformed data {
+  vector[3] log_y1[N1];
+  vector[3] log_y2[N2];
+  vector[3] log_y3[N3];
+  
+  for (j in 1:3){
+    log_y1[,j] = log(y1[,j+1]);
+    log_y2[,j] = log(y2[,j+1]);
+    log_y3[,j] = log(y3[,j+1]);
+  }
+}
+
+parameters {
+  real<lower=0> alpha;
+  real<lower=0> beta;
+  vector [3] mu;
+  vector<lower=0> [3] sigma;
+}
+
+model {
+  // Priors
+  alpha ~ gamma(1, 1);
+  beta ~ gamma(0.5, 1);  
+  for (j in 1:3) {
+    mu[j] ~ normal(0,20);
+    sigma[j] ~ gamma(1, 1);
+  }
+  // Likelihoods
+  y1[,1] ~ gamma(alpha, beta);
+  y2[,1] ~ gamma(alpha, beta);
+  y3[,1] ~ gamma(alpha, beta);
+  for (j in 1:3) {
+    log_y1[,j] ~ normal(mu[j], sigma[j]);
+    log_y2[,j] ~ normal(mu[j], sigma[j]);
+    log_y3[,j] ~ normal(mu[j], sigma[j]);
+  }
+}
+
+generated quantities {
+  // Posterior predictive distributions
+  vector[4] ypred_1;
+  vector[4] ypred_2;
+  vector[4] ypred_3;
+  // Log-likelihoods of the posterior draws
+  vector[4] log_lik_1[N1];
+  vector[4] log_lik_2[N2];
+  vector[4] log_lik_3[N3];
+  
+  // Group 1
+  ypred_1[1] = gamma_rng(alpha, beta);
+  for (n in 1:N1)
+    log_lik_1[n,1] = gamma_lpdf(y1[n,1] | alpha, beta);
+    
+  for (j in 1:3) {
+    ypred_1[j+1] = normal_rng(mu[j], sigma[j]);
+    for (n in 1:N1) {
+      log_lik_1[n,j+1] = normal_lpdf(log_y1[n,j] | mu[j], sigma[j]);
+    }
+  }
+  //Group 2
+  ypred_2[1] = gamma_rng(alpha, beta);
+  for (n in 1:N2)
+    log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha, beta);
+    
+  for (j in 1:3) {
+    ypred_2[j+1] = normal_rng(mu[j], sigma[j]);
+    for (n in 1:N2) {
+      log_lik_2[n,j+1] = normal_lpdf(log_y2[n,j] | mu[j], sigma[j]);
+    }
+  }
+  //Group 3
+  ypred_3[1] = gamma_rng(alpha, beta);
+  for (n in 1:N3)
+      log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha, beta);
+      
+  for (j in 1:3) {
+    ypred_3[j+1] = normal_rng(mu[j], sigma[j]);
+    for (n in 1:N3) {
+      log_lik_3[n,j+1] = normal_lpdf(log_y3[n,j] | mu[j], sigma[j]);
+    }
+  }
+}
+
+```
+
+### Hierarchical
+
+```{eval=FALSE}
+data {
+  // Lengths of the observation vectors
+  int<lower=0> N1;
+  int<lower=0> N2;
+  int<lower=0> N3;
+  // Observations of the 4 protein levels for each group
+  vector[4] y1[N1];
+  vector[4] y2[N2];
+  vector[4] y3[N3];
+}
+
+transformed data {
+  vector[3] log_y1[N1];
+  vector[3] log_y2[N2];
+  vector[3] log_y3[N3];
+  
+  for (j in 1:3){
+    log_y1[,j] = log(y1[,j+1]);
+    log_y2[,j] = log(y2[,j+1]);
+    log_y3[,j] = log(y3[,j+1]);
+  }
+}
+
+parameters {
+  // Hyperparamters
+  real<lower=0> alphaP[2];
+  real<lower=0> betaP[2];
+  vector[3] muP[2];
+  vector<lower=0>[3] sigmaP[2];
+  // Parameters
+  real<lower=0> alpha[3];
+  real<lower=0> beta[3];
+  vector [3] mu[3];
+  vector<lower=0> [3] sigma[3];
+}
+
+model {
+  // k-> number of parameters in priors
+  // j-> number of proteins
+  // Hyperpriors
+  for (k in 1:2){
+    alphaP[k] ~ gamma(1,1);
+    betaP[k] ~ gamma(1,1);
+    sigmaP[k,] ~ gamma(1,1);
+  }
+  muP[1,] ~ normal(0,20);
+  muP[2,] ~ gamma(1,1);
+  // Priors
+  alpha ~ gamma(alphaP[1], betaP[1]);
+  beta ~ gamma(alphaP[2], betaP[2]);
+  for (j in 1:3){
+    mu[,j] ~ normal(muP[1,j], sigmaP[1,j]);
+    sigma[,j] ~ gamma(muP[2,j], sigmaP[2,j]);
+  }
+  // Likelihood
+  y1[,1] ~ gamma(alpha[1], beta[1]);
+  y2[,1] ~ gamma(alpha[2], beta[2]);
+  y3[,1] ~ gamma(alpha[3], beta[3]);
+  for (j in 1:3){
+    log_y1[,j] ~ normal(mu[1,j], sigma[1,j]);
+    log_y2[,j] ~ normal(mu[2,j], sigma[2,j]);
+    log_y3[,j] ~ normal(mu[3,j], sigma[3,j]);
+  }
+}
+
+generated quantities {
+  // Posterior predictive distributions
+  vector[4] ypred_1;
+  vector[4] ypred_2;
+  vector[4] ypred_3;
+  // Log-likelihoods of the posterior draws
+  vector[4] log_lik_1[N1];
+  vector[4] log_lik_2[N2];
+  vector[4] log_lik_3[N3];
+  
+  // Group 1
+  ypred_1[1] = gamma_rng(alpha[1], beta[1]);
+  for (n in 1:N1)
+    log_lik_1[n,1] = gamma_lpdf(y1[n,1] | alpha[1], beta[1]);
+    
+  for (j in 1:3) {
+    ypred_1[j+1] = normal_rng(mu[1,j], sigma[1,j]);
+    for (n in 1:N1) {
+      log_lik_1[n,j+1] = normal_lpdf(log_y1[n,j] | mu[1,j], sigma[1,j]);
+    }
+  }
+  //Group 2
+  ypred_2[1] = gamma_rng(alpha[2], beta[2]);
+  for (n in 1:N2)
+    log_lik_2[n,1] = gamma_lpdf(y2[n,1] | alpha[2], beta[2]);
+    
+  for (j in 1:3) {
+    ypred_2[j+1] = normal_rng(mu[2,j], sigma[2,j]);
+    for (n in 1:N2) {
+      log_lik_2[n,j+1] = normal_lpdf(log_y2[n,j] | mu[2,j], sigma[2,j]);
+    }
+  }
+  //Group 3
+  ypred_3[1] = gamma_rng(alpha[3], beta[3]);
+  for (n in 1:N3)
+      log_lik_3[n,1] = gamma_lpdf(y3[n,1] | alpha[3], beta[3]);
+      
+  for (j in 1:3) {
+    ypred_3[j+1] = normal_rng(mu[3,j], sigma[3,j]);
+    for (n in 1:N3) {
+      log_lik_3[n,j+1] = normal_lpdf(log_y3[n,j] | mu[3,j], sigma[3,j]);
+    }
+  }
+}
+
+```
+
+## Appendix B: R script for fitting, diagnostics and posterior predictive checks in case of the hierarchical model
+
+```{r, eval=FALSE}
+library(rstan)
+library(loo)
+library(ggplot2)
+
+# REPLACE WITH WORKING PATH
+data_path <- '.../Debernardi et al 2020 data.csv'
+data <- read.csv(data_path)
+
+# Split the data into test subject groups
+group_1 <- data[data$diagnosis == 1,]
+group_2 <- data[data$diagnosis == 2,]
+group_3 <- data[data$diagnosis == 3,]
+
+# Organize input data for the Stan model 
+stan_data <- list(
+  N1 = length(group_1[,1]),
+  N2 = length(group_2[,1]),
+  N3 = length(group_3[,1]),
+  y1 = group_1[, c('creatinine', 'LYVE1', 'REG1B', 'TFF1')],
+  y2 = group_2[, c('creatinine', 'LYVE1', 'REG1B', 'TFF1')],
+  y3 = group_3[, c('creatinine', 'LYVE1', 'REG1B', 'TFF1')]
+)
+
+# Fit the Stan model
+hier_fit <- stan(
+  # REPLACE WITH WORKING PATH
+  file = '.../cancer-biomarker-analysis/models/hierarchical.stan',
+  data = stan_data,
+  iter = 4000,
+  control = list(adapt_delta = 0.99)
+)
+
+# Store convergence diagnostics
+results <- monitor(hier_fit)
+selected_res <- results[c(1:40), c('mean', 'sd', 'n_eff', 'Rhat', 'Q5', 'Q50', 'Q95')]
+res_df <- as.data.frame(selected_res)
+# REPLACE WITH WORKING PATH
+write.csv(res_df,'.../cancer-biomarker-analysis/diagnostic_data/hier_res.csv')
+
+# Extract log-likelihoods for LOO evaluation
+log_liks <- list(
+  extract_log_lik(hier_fit, parameter_name = 'log_lik_1', merge_chains = FALSE),
+  extract_log_lik(hier_fit, parameter_name = 'log_lik_2', merge_chains = FALSE),
+  extract_log_lik(hier_fit, parameter_name = 'log_lik_3', merge_chains = FALSE)
+)
+
+# Initialize the diagnostics matrix
+diagnostics <- matrix(0, nrow = 3, ncol = 2,
+                      dimnames = list(
+                        c('Group 1', 'Group 2', 'Group 3'),
+                        c('ELPD', 'P_eff')
+                      )
+)
+
+# Compute diagnostics for each group
+for (i in 1:3) {
+  log_lik <- log_liks[[i]]
+  r_eff <- relative_eff(exp(log_lik)) # Relative efficiency
+  loo <- loo(log_lik, r_eff=r_eff) # LOO object
+  
+  estimates <- loo$estimates
+  elpd <- estimates[1,1] # PSIS-LOO value
+  p_eff <- estimates[2,1] # Effective number of parameters
+  
+  diagnostics[i,1] = elpd
+  diagnostics[i,2] = p_eff
+  print(loo, plot_k = TRUE)
+}
+
+hier_eval <- as.data.frame(diagnostics)
+# REPLACE WITH WORKING PATH
+write.csv(hier_eval, '.../cancer-biomarker-analysis/diagnostic_data/hier_eval.csv')
+
+# Visualize posterior distributions
+
+draws <- as.data.frame(hier_fit)
+
+pCreatinine <- ggplot() + ggtitle('Posterior distribution of creatinine')
+x <- seq(0,5,0.05)
+for (i in seq(1,8000,100)) {
+  df1 <- data.frame(x=x,y=dgamma(x,draws$`alpha[1]`[i],draws$`beta[1]`[i]))
+  df2 <- data.frame(x=x,y=dgamma(x,draws$`alpha[2]`[i],draws$`beta[2]`[i]))
+  df3 <- data.frame(x=x,y=dgamma(x,draws$`alpha[3]`[i],draws$`beta[3]`[i]))
+  pCreatinine <- pCreatinine + 
+    geom_line(data=df1,aes(x,y), color="lightgreen",alpha=0.4) +    
+    geom_line(data=df2,aes(x,y), color="skyblue",alpha=0.4) +
+    geom_line(data=df3,aes(x,y), color="tomato",alpha=0.4)
+}
+pCreatinine
+
+pLYVE1 <- ggplot() + ggtitle('Posterior distribution of LYVE1')
+x <- seq(-15,15,0.1)
+for (i in seq(1,8000,100)) {
+  df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,1]`[i],draws$`sigma[1,1]`[i]))
+  df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,2]`[i],draws$`sigma[1,2]`[i]))
+  df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[1,3]`[i],draws$`sigma[1,3]`[i]))
+  pLYVE1 <- pLYVE1 + 
+    geom_line(data=df1,aes(x,y),col='lightgreen',alpha=0.4) +    
+    geom_line(data=df2,aes(x,y),col='skyblue',alpha=0.4) +
+    geom_line(data=df3,aes(x,y),col='tomato',alpha=0.4)
+}
+pLYVE1
+
+pREG1B <- ggplot() + ggtitle('Posterior distribution of REG1B')
+x <- seq(-10,15,0.1)
+for (i in seq(1,8000,100)) {
+  df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,1]`[i],draws$`sigma[2,1]`[i]))
+  df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,2]`[i],draws$`sigma[2,2]`[i]))
+  df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[2,3]`[i],draws$`sigma[2,3]`[i]))
+  pREG1B <- pREG1B + 
+    geom_line(data=df1,aes(x,y),col='lightgreen',alpha=0.4) +    
+    geom_line(data=df2,aes(x,y),col='skyblue',alpha=0.4) +
+    geom_line(data=df3,aes(x,y),col='tomato',alpha=0.4)
+}
+pREG1B
+
+pTFF1 <- ggplot() + ggtitle('Posterior distribution of TFF1')
+x <- seq(-3,15,0.1)
+for (i in seq(1,8000,100)) {
+  df1 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,1]`[i],draws$`sigma[3,1]`[i]))
+  df2 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,2]`[i],draws$`sigma[3,2]`[i]))
+  df3 <- data.frame(x=x,y=dnorm(x,draws$`mu[3,3]`[i],draws$`sigma[3,3]`[i]))
+  pTFF1 <- pTFF1 + 
+    geom_line(data=df1,aes(x,y),col='lightgreen',alpha=0.4) +    
+    geom_line(data=df2,aes(x,y),col='skyblue',alpha=0.4) +
+    geom_line(data=df3,aes(x,y),col='tomato',alpha=0.4)
+}
+pTFF1
+
+# Posterior predictive check
+
+# Visualizing posterior predictive distributions
+stan_hist(hier_fit, pars = c('ypred_1[1]','ypred_1[2]','ypred_1[3]','ypred_1[4]'))
+stan_hist(hier_fit, pars = c('ypred_2[1]','ypred_2[2]','ypred_2[3]','ypred_2[4]'))
+stan_hist(hier_fit, pars = c('ypred_3[1]','ypred_3[2]','ypred_3[3]','ypred_3[4]'))
+
+plotPostCheck <- function(dataCol, ypred, N, bin, title, xlabel){
+  df<- data.frame(values=dataCol)
+  p <- ggplot() + 
+    geom_histogram(data=df,aes(x=values),fill='white',color="black", binwidth = bin) +
+    ggtitle(title) + xlab(xlabel)
+  for (j in 1:4) {
+    df <- data.frame(values=sample(ypred,N))
+    p <- p + geom_histogram(data=df,aes(x=values),fill=j+1, alpha = 0.2, binwidth = bin)
+  }
+  p
+}
+
+#Creatinine
+pPostCheck_C1 <- plotPostCheck(data[data$diagnosis==1,]$creatinine,draws$`ypred_1[1]`,
+                              stan_data$N1,0.1,
+                              "Replicated datasets of creatinine
+                              compared to the original data for diagnosis 1",
+                              "creatinine")
+pPostCheck_C1
+pPostCheck_C2 <- plotPostCheck(data[data$diagnosis==2,]$creatinine,draws$`ypred_2[1]`,
+                               stan_data$N2,0.1,
+                               "Replicated datasets of creatinine
+                               compared to the original data for diagnosis 2 ",
+                               "creatinine")
+pPostCheck_C2
+pPostCheck_C3 <- plotPostCheck(data[data$diagnosis==3,]$creatinine,draws$`ypred_3[1]`,
+                               stan_data$N3,0.1,
+                               "Replicated datasets of creatinine
+                               compared to the original data for diagnosis 3",
+                               "creatinine")
+pPostCheck_C3
+
+#LYVE1
+pPostCheck_L1 <- plotPostCheck(log(data[data$diagnosis==1,]$LYVE1),draws$`ypred_1[2]`,
+                               stan_data$N1,0.5,
+                               "Replicated datasets of LYVE1
+                               compared to the original data for diagnosis 1",
+                               "log(LYVE1)")
+pPostCheck_L1
+pPostCheck_L2 <- plotPostCheck(log(data[data$diagnosis==2,]$LYVE1),draws$`ypred_2[2]`,
+                               stan_data$N2,0.5,
+                               "Replicated datasets of LYVE1
+                               compared to the original data for diagnosis 2",
+                               "log(LYVE1)")
+pPostCheck_L2
+pPostCheck_L3 <- plotPostCheck(log(data[data$diagnosis==3,]$LYVE1),draws$`ypred_3[2]`,
+                               stan_data$N3,0.5,
+                               "Replicated datasets of LYVE1
+                               compared to the original data for diagnosis 3",
+                               "log(LYVE1)")
+pPostCheck_L3
+
+#REG1B
+pPostCheck_R1 <- plotPostCheck(log(data[data$diagnosis==1,]$REG1B),draws$`ypred_1[3]`,
+                               stan_data$N1,0.5,
+                               "Replicated datasets of REG1B
+                               compared to the original data for diagnosis 1",
+                               "log(REG1B)")
+pPostCheck_R1
+pPostCheck_R2 <- plotPostCheck(log(data[data$diagnosis==2,]$REG1B),draws$`ypred_2[3]`,
+                               stan_data$N2,0.5,
+                               "Replicated datasets of REG1B
+                               compared to the original data for diagnosis 2",
+                               "log(REG1B)")
+pPostCheck_R2
+pPostCheck_R3 <- plotPostCheck(log(data[data$diagnosis==3,]$REG1B),draws$`ypred_3[3]`,
+                               stan_data$N2,0.5,
+                               "Replicated datasets of REG1B
+                               compared to the original data for diagnosis 3",
+                               "log(REG1B)")
+pPostCheck_R3
+
+#TFF1
+pPostCheck_T1 <- plotPostCheck(log(data[data$diagnosis==1,]$TFF1),draws$`ypred_1[4]`,
+                               stan_data$N1,1,
+                               "Replicated datasets of TFF1
+                               compared to the original data for diagnosis 1",
+                               "log(TFF1)")
+pPostCheck_T1
+pPostCheck_T2 <- plotPostCheck(log(data[data$diagnosis==2,]$TFF1),draws$`ypred_2[4]`,
+                               stan_data$N2,1,
+                               "Replicated datasets of TFF1
+                               compared to the original data for diagnosis 2",
+                               "log(TFF1)")
+pPostCheck_T2
+pPostCheck_T3 <- plotPostCheck(log(data[data$diagnosis==3,]$TFF1),draws$`ypred_3[4]`,
+                               stan_data$N3,1,
+                               "Replicated datasets of TFF1
+                               compared to the original data for diagnosis 3",
+                               "log(TFF1)")
+pPostCheck_T3
+```
