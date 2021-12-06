@@ -603,7 +603,7 @@ Finally, it has to be stated, that even though our hierarchical model seems to p
 
 # References
 
-- [1] https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7031151/
+- [1] Sarantis P, Koustas E, Papadimitropoulou A, Papavassiliou AG, Karamouzis MV. (2020) *Pancreatic ductal adenocarcinoma: Treatment hurdles, tumor microenvironment and immunotherapy.* World J Gastrointest Oncol. 2020;12(2):173-181. https://doi.org/10.4251/wjgo.v12.i2.173
 - [2] Debernardi S, O'Brien H, Algahmdi AS, Malats N, Stewart GD, Plješa-Ercegovac M, et al. (2020) *A combination of urinary biomarker panel and PancRISK score for earlier detection of pancreatic cancer: A case--control study.* PLoS Med 17(12): e1003489. https://doi.org/10.1371/journal.pmed.1003489
 - [3] Bayesian Data Analysis, Third edition; Gelman, Carlin, Stern, Dunson, Vehtari and Rubin; 2016
 - [4] https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html
