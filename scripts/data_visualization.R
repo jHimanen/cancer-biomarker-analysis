@@ -1,8 +1,8 @@
-#Plot histograms by groups
+# Plot histograms by groups
 
 library(ggplot2)
 
-data_path <- '~/your/path/to/dataset' # Replace with working path
+data_path <- '.../Debernardi et al 2020 data.csv' # REPLACE WITH WORKING PATH
 data <- read.csv(data_path)
 
 #Creatinine

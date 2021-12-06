@@ -2,7 +2,7 @@
 
 library(rstan)
 library(ggplot2)
-data_path <- "Kurssit/Bayesian Data Analysis/Project/Debernardi et al 2020 data.csv" #'~/path/to/your/data' # Replace with working path
+data_path <- '.../Debernardi et al 2020 data.csv' # REPLACE WITH WORKING PATH
 data <- read.csv(data_path)
 
 # Split the data into test subject groups
@@ -42,7 +42,7 @@ for (i in 1:6) {
   # Fit the Stan model
   stan_data$p <- S[i,]
   pooled_fit <- stan(
-    file = 'Kurssit/Bayesian Data Analysis/Project/cancer-biomarker-analysis/models/pooled_sensitivity_analysis.stan', #'../models/pooled_sensitivity_analysis.stan',
+    file = '.../cancer-biomarker-analysis/models/pooled_sensitivity_analysis.stan', # REPLACE WITH WORKING PATH
     data = stan_data
   )
   monitor(pooled_fit)
@@ -133,7 +133,7 @@ for (i in 1:6) {
   # Fit the Stan model
   stan_data$p <- S[i,]
   hier_fit <- stan(
-    file = 'Kurssit/Bayesian Data Analysis/Project/cancer-biomarker-analysis/models/hierarchical_sensitivity_analysis.stan', #'../models/hierarchical_sensitivity_analysis.stan',
+    file = '.../cancer-biomarker-analysis/models/hierarchical_sensitivity_analysis.stan', # REPLACE WITH WORKING PATH
     data = stan_data
   )
   monitor(hier_fit)
